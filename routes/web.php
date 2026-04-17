@@ -26,4 +26,6 @@ return static function (Router $router): void {
         AuthMiddleware::class,
         new PermissionMiddleware('dashboard.view'),
     ]);
+
+    (require __DIR__ . '/module_routes.php')($router);
 };

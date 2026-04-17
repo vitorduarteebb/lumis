@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 /**
- * Menu lateral principal — hrefs com # estão reservados para módulos futuros.
+ * Menu lateral — URLs alinhadas a routes/module_routes.php e slugs em config/permissions.php.
  *
  * @return list<array<string, mixed>>
  */
@@ -20,11 +20,11 @@ return [
         'label' => 'Cadastros',
         'icon' => 'bi-people',
         'children' => [
-            ['label' => 'Clientes', 'href' => '#', 'disabled' => true],
-            ['label' => 'Fornecedores', 'href' => '#', 'disabled' => true],
-            ['label' => 'Funcionários', 'href' => '#', 'disabled' => true],
-            ['label' => 'Transportadoras', 'href' => '#', 'disabled' => true],
-            ['label' => 'Opções auxiliares', 'href' => '#', 'disabled' => true],
+            ['label' => 'Clientes', 'href' => '/cadastros/clientes'],
+            ['label' => 'Fornecedores', 'href' => '/cadastros/fornecedores'],
+            ['label' => 'Funcionários', 'href' => '/cadastros/funcionarios'],
+            ['label' => 'Transportadoras', 'href' => '/cadastros/transportadoras'],
+            ['label' => 'Opções auxiliares', 'href' => '/cadastros/opcoes-auxiliares'],
         ],
     ],
     [
@@ -32,27 +32,27 @@ return [
         'label' => 'Produtos',
         'icon' => 'bi-box-seam',
         'children' => [
-            ['label' => 'Gerenciar produtos', 'href' => '#', 'disabled' => true],
-            ['label' => 'Valores de venda', 'href' => '#', 'disabled' => true],
-            ['label' => 'Etiquetas', 'href' => '#', 'disabled' => true],
-            ['label' => 'Opções auxiliares', 'href' => '#', 'disabled' => true],
+            ['label' => 'Gerenciar produtos', 'href' => '/produtos'],
+            ['label' => 'Valores de venda', 'href' => '/produtos/valores-venda'],
+            ['label' => 'Etiquetas', 'href' => '/produtos/etiquetas'],
+            ['label' => 'Opções auxiliares', 'href' => '/produtos/opcoes-auxiliares'],
         ],
     ],
     [
         'key' => 'servicos',
         'label' => 'Serviços',
         'icon' => 'bi-wrench-adjustable',
-        'href' => '#',
-        'disabled' => true,
+        'href' => '/servicos',
+        'match' => 'exact',
     ],
     [
         'key' => 'orcamentos',
         'label' => 'Orçamentos',
         'icon' => 'bi-file-earmark-text',
         'children' => [
-            ['label' => 'Produtos', 'href' => '#', 'disabled' => true],
-            ['label' => 'Serviços', 'href' => '#', 'disabled' => true],
-            ['label' => 'Opções auxiliares', 'href' => '#', 'disabled' => true],
+            ['label' => 'Produtos', 'href' => '/orcamentos/produtos'],
+            ['label' => 'Serviços', 'href' => '/orcamentos/servicos'],
+            ['label' => 'Opções auxiliares', 'href' => '/orcamentos/opcoes-auxiliares'],
         ],
     ],
     [
@@ -60,9 +60,9 @@ return [
         'label' => 'Ordens de Serviços',
         'icon' => 'bi-clipboard-check',
         'children' => [
-            ['label' => 'Gerenciar O.S.', 'href' => '#', 'disabled' => true],
-            ['label' => 'Painel', 'href' => '#', 'disabled' => true],
-            ['label' => 'Opções auxiliares', 'href' => '#', 'disabled' => true],
+            ['label' => 'Gerenciar O.S.', 'href' => '/ordens-servico'],
+            ['label' => 'Painel', 'href' => '/ordens-servico/painel'],
+            ['label' => 'Opções auxiliares', 'href' => '/ordens-servico/opcoes-auxiliares'],
         ],
     ],
     [
@@ -70,10 +70,10 @@ return [
         'label' => 'Vendas',
         'icon' => 'bi-cart3',
         'children' => [
-            ['label' => 'Produtos', 'href' => '#', 'disabled' => true],
-            ['label' => 'Balcão', 'href' => '#', 'disabled' => true],
-            ['label' => 'Serviços', 'href' => '#', 'disabled' => true],
-            ['label' => 'Opções auxiliares', 'href' => '#', 'disabled' => true],
+            ['label' => 'Produtos', 'href' => '/vendas/produtos'],
+            ['label' => 'Balcão', 'href' => '/vendas/balcao'],
+            ['label' => 'Serviços', 'href' => '/vendas/servicos'],
+            ['label' => 'Opções auxiliares', 'href' => '/vendas/opcoes-auxiliares'],
         ],
     ],
     [
@@ -81,13 +81,13 @@ return [
         'label' => 'Estoque',
         'icon' => 'bi-archive',
         'children' => [
-            ['label' => 'Movimentações', 'href' => '#', 'disabled' => true],
-            ['label' => 'Ajustes', 'href' => '#', 'disabled' => true],
-            ['label' => 'Transferências', 'href' => '#', 'disabled' => true],
-            ['label' => 'Cotações', 'href' => '#', 'disabled' => true],
-            ['label' => 'Compras', 'href' => '#', 'disabled' => true],
-            ['label' => 'Trocas e devoluções', 'href' => '#', 'disabled' => true],
-            ['label' => 'Opções auxiliares', 'href' => '#', 'disabled' => true],
+            ['label' => 'Movimentações', 'href' => '/estoque/movimentacoes'],
+            ['label' => 'Ajustes', 'href' => '/estoque/ajustes'],
+            ['label' => 'Transferências', 'href' => '/estoque/transferencias'],
+            ['label' => 'Cotações', 'href' => '/estoque/cotacoes'],
+            ['label' => 'Compras', 'href' => '/estoque/compras'],
+            ['label' => 'Trocas e devoluções', 'href' => '/estoque/trocas-devolucoes'],
+            ['label' => 'Opções auxiliares', 'href' => '/estoque/opcoes-auxiliares'],
         ],
     ],
     [
@@ -95,12 +95,12 @@ return [
         'label' => 'Financeiro',
         'icon' => 'bi-cash-stack',
         'children' => [
-            ['label' => 'Contas a pagar', 'href' => '#', 'disabled' => true],
-            ['label' => 'Contas a receber', 'href' => '#', 'disabled' => true],
-            ['label' => 'DRE gerencial', 'href' => '#', 'disabled' => true],
-            ['label' => 'Fluxo de caixa', 'href' => '#', 'disabled' => true],
-            ['label' => 'Boletos bancários', 'href' => '#', 'disabled' => true],
-            ['label' => 'Opções auxiliares', 'href' => '#', 'disabled' => true],
+            ['label' => 'Contas a pagar', 'href' => '/financeiro/contas-pagar'],
+            ['label' => 'Contas a receber', 'href' => '/financeiro/contas-receber'],
+            ['label' => 'DRE gerencial', 'href' => '/financeiro/dre-gerencial'],
+            ['label' => 'Fluxo de caixa', 'href' => '/financeiro/fluxo-caixa'],
+            ['label' => 'Boletos bancários', 'href' => '/financeiro/boletos-bancarios'],
+            ['label' => 'Opções auxiliares', 'href' => '/financeiro/opcoes-auxiliares'],
         ],
     ],
     [
@@ -108,11 +108,11 @@ return [
         'label' => 'Notas Fiscais',
         'icon' => 'bi-receipt',
         'children' => [
-            ['label' => 'Notas de produtos', 'href' => '#', 'disabled' => true],
-            ['label' => 'Notas de serviços', 'href' => '#', 'disabled' => true],
-            ['label' => 'Notas do consumidor', 'href' => '#', 'disabled' => true],
-            ['label' => 'Notas de compras', 'href' => '#', 'disabled' => true],
-            ['label' => 'Opções auxiliares', 'href' => '#', 'disabled' => true],
+            ['label' => 'Notas de produtos', 'href' => '/notas-fiscais/produtos'],
+            ['label' => 'Notas de serviços', 'href' => '/notas-fiscais/servicos'],
+            ['label' => 'Notas do consumidor', 'href' => '/notas-fiscais/consumidor'],
+            ['label' => 'Notas de compras', 'href' => '/notas-fiscais/compras'],
+            ['label' => 'Opções auxiliares', 'href' => '/notas-fiscais/opcoes-auxiliares'],
         ],
     ],
     [
@@ -120,10 +120,10 @@ return [
         'label' => 'Contratos',
         'icon' => 'bi-file-earmark-ruled',
         'children' => [
-            ['label' => 'Serviços', 'href' => '#', 'disabled' => true],
-            ['label' => 'Locações', 'href' => '#', 'disabled' => true],
-            ['label' => 'Assinaturas', 'href' => '#', 'disabled' => true],
-            ['label' => 'Opções auxiliares', 'href' => '#', 'disabled' => true],
+            ['label' => 'Serviços', 'href' => '/contratos/servicos'],
+            ['label' => 'Locações', 'href' => '/contratos/locacoes'],
+            ['label' => 'Assinaturas', 'href' => '/contratos/assinaturas'],
+            ['label' => 'Opções auxiliares', 'href' => '/contratos/opcoes-auxiliares'],
         ],
     ],
     [
@@ -131,10 +131,10 @@ return [
         'label' => 'Atendimentos',
         'icon' => 'bi-headset',
         'children' => [
-            ['label' => 'Painel', 'href' => '#', 'disabled' => true],
-            ['label' => 'Histórico', 'href' => '#', 'disabled' => true],
-            ['label' => 'Status', 'href' => '#', 'disabled' => true],
-            ['label' => 'Opções auxiliares', 'href' => '#', 'disabled' => true],
+            ['label' => 'Painel', 'href' => '/atendimentos/painel'],
+            ['label' => 'Histórico', 'href' => '/atendimentos/historico'],
+            ['label' => 'Status', 'href' => '/atendimentos/status'],
+            ['label' => 'Opções auxiliares', 'href' => '/atendimentos/opcoes-auxiliares'],
         ],
     ],
     [
@@ -142,14 +142,14 @@ return [
         'label' => 'Relatórios',
         'icon' => 'bi-graph-up-arrow',
         'children' => [
-            ['label' => 'Cadastros', 'href' => '#', 'disabled' => true],
-            ['label' => 'Vendas', 'href' => '#', 'disabled' => true],
-            ['label' => 'Ordens de serviços', 'href' => '#', 'disabled' => true],
-            ['label' => 'Estoque', 'href' => '#', 'disabled' => true],
-            ['label' => 'Financeiro', 'href' => '#', 'disabled' => true],
-            ['label' => 'Contratos', 'href' => '#', 'disabled' => true],
-            ['label' => 'Notas fiscais', 'href' => '#', 'disabled' => true],
-            ['label' => 'Logs do sistema', 'href' => '#', 'disabled' => true],
+            ['label' => 'Cadastros', 'href' => '/relatorios/cadastros'],
+            ['label' => 'Vendas', 'href' => '/relatorios/vendas'],
+            ['label' => 'Ordens de serviços', 'href' => '/relatorios/ordens-servico'],
+            ['label' => 'Estoque', 'href' => '/relatorios/estoque'],
+            ['label' => 'Financeiro', 'href' => '/relatorios/financeiro'],
+            ['label' => 'Contratos', 'href' => '/relatorios/contratos'],
+            ['label' => 'Notas fiscais', 'href' => '/relatorios/notas-fiscais'],
+            ['label' => 'Logs do sistema', 'href' => '/relatorios/logs-sistema'],
         ],
     ],
     [
@@ -157,15 +157,15 @@ return [
         'label' => 'Configurações',
         'icon' => 'bi-gear',
         'children' => [
-            ['label' => 'Gerais', 'href' => '#', 'disabled' => true],
-            ['label' => 'Meu plano', 'href' => '#', 'disabled' => true],
-            ['label' => 'Usuários', 'href' => '#', 'disabled' => true],
-            ['label' => 'Dados da empresa', 'href' => '#', 'disabled' => true],
-            ['label' => 'Marca da empresa', 'href' => '#', 'disabled' => true],
-            ['label' => 'Empresas / Lojas', 'href' => '#', 'disabled' => true],
-            ['label' => 'Certificado digital', 'href' => '#', 'disabled' => true],
-            ['label' => 'Modelos de e-mails', 'href' => '#', 'disabled' => true],
-            ['label' => 'Avisos por e-mail', 'href' => '#', 'disabled' => true],
+            ['label' => 'Gerais', 'href' => '/configuracoes/gerais'],
+            ['label' => 'Meu plano', 'href' => '/configuracoes/meu-plano'],
+            ['label' => 'Usuários', 'href' => '/configuracoes/usuarios'],
+            ['label' => 'Dados da empresa', 'href' => '/configuracoes/dados-empresa'],
+            ['label' => 'Marca da empresa', 'href' => '/configuracoes/marca-empresa'],
+            ['label' => 'Empresas / Lojas', 'href' => '/configuracoes/empresas-lojas'],
+            ['label' => 'Certificado digital', 'href' => '/configuracoes/certificado-digital'],
+            ['label' => 'Modelos de e-mails', 'href' => '/configuracoes/modelos-email'],
+            ['label' => 'Avisos por e-mail', 'href' => '/configuracoes/avisos-email'],
         ],
     ],
 ];

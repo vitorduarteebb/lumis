@@ -10,11 +10,15 @@ use App\Exceptions\HttpException;
 /**
  * Verifica se a permissão está presente em $_SESSION['permissions'] (array de strings).
  * Instancie com new PermissionMiddleware('modulo.acao') nas rotas.
+ * Aliases: slugs legados ou equivalentes aceitos na mesma rota (ex.: clients.view → cadastros.clients.view).
+ *
+ * @param list<string> $aliases
  */
 final class PermissionMiddleware implements MiddlewareInterface
 {
     public function __construct(
-        private readonly string $permission
+        private readonly string $permission,
+        private readonly array $aliases = []
     ) {
     }
 
@@ -30,10 +34,13 @@ final class PermissionMiddleware implements MiddlewareInterface
             $list = [];
         }
 
-        if (!in_array($this->permission, $list, true)) {
-            throw new HttpException(403, 'Acesso negado.');
+        $candidates = array_merge([$this->permission], $this->aliases);
+        foreach ($candidates as $slug) {
+            if (in_array($slug, $list, true)) {
+                return $next($request);
+            }
         }
 
-        return $next($request);
+        throw new HttpException(403, 'Acesso negado.');
     }
 }

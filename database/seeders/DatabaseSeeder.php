@@ -92,44 +92,27 @@ SQL;
      */
     private static function permissionDefinitions(): array
     {
-        return [
-            ['name' => 'Painel — visualizar', 'slug' => 'dashboard.view', 'module' => 'dashboard', 'action' => 'view'],
+        $fromConfig = require config_path('permissions.php');
+        if (!is_array($fromConfig)) {
+            return [];
+        }
 
-            ['name' => 'Usuários — listar', 'slug' => 'users.view', 'module' => 'settings', 'action' => 'view'],
-            ['name' => 'Usuários — criar', 'slug' => 'users.create', 'module' => 'settings', 'action' => 'create'],
-            ['name' => 'Usuários — editar', 'slug' => 'users.edit', 'module' => 'settings', 'action' => 'edit'],
-
-            ['name' => 'Clientes — listar', 'slug' => 'clients.view', 'module' => 'cadastros', 'action' => 'view'],
+        $crud = [
             ['name' => 'Clientes — criar', 'slug' => 'clients.create', 'module' => 'cadastros', 'action' => 'create'],
             ['name' => 'Clientes — editar', 'slug' => 'clients.edit', 'module' => 'cadastros', 'action' => 'edit'],
-
-            ['name' => 'Fornecedores — listar', 'slug' => 'suppliers.view', 'module' => 'cadastros', 'action' => 'view'],
             ['name' => 'Fornecedores — criar', 'slug' => 'suppliers.create', 'module' => 'cadastros', 'action' => 'create'],
             ['name' => 'Fornecedores — editar', 'slug' => 'suppliers.edit', 'module' => 'cadastros', 'action' => 'edit'],
-
-            ['name' => 'Funcionários — listar', 'slug' => 'employees.view', 'module' => 'cadastros', 'action' => 'view'],
             ['name' => 'Funcionários — criar', 'slug' => 'employees.create', 'module' => 'cadastros', 'action' => 'create'],
             ['name' => 'Funcionários — editar', 'slug' => 'employees.edit', 'module' => 'cadastros', 'action' => 'edit'],
-
-            ['name' => 'Transportadoras — listar', 'slug' => 'carriers.view', 'module' => 'cadastros', 'action' => 'view'],
             ['name' => 'Transportadoras — criar', 'slug' => 'carriers.create', 'module' => 'cadastros', 'action' => 'create'],
             ['name' => 'Transportadoras — editar', 'slug' => 'carriers.edit', 'module' => 'cadastros', 'action' => 'edit'],
-
-            ['name' => 'Produtos — listar', 'slug' => 'products.view', 'module' => 'produtos', 'action' => 'view'],
             ['name' => 'Produtos — criar', 'slug' => 'products.create', 'module' => 'produtos', 'action' => 'create'],
             ['name' => 'Produtos — editar', 'slug' => 'products.edit', 'module' => 'produtos', 'action' => 'edit'],
-
-            ['name' => 'Serviços — listar', 'slug' => 'services.view', 'module' => 'servicos', 'action' => 'view'],
             ['name' => 'Serviços — criar', 'slug' => 'services.create', 'module' => 'servicos', 'action' => 'create'],
             ['name' => 'Serviços — editar', 'slug' => 'services.edit', 'module' => 'servicos', 'action' => 'edit'],
-
-            ['name' => 'Financeiro — visualizar', 'slug' => 'finance.view', 'module' => 'financeiro', 'action' => 'view'],
-            ['name' => 'Contas a pagar — visualizar', 'slug' => 'finance.accounts_payable.view', 'module' => 'financeiro', 'action' => 'view'],
-            ['name' => 'Contas a receber — visualizar', 'slug' => 'finance.accounts_receivable.view', 'module' => 'financeiro', 'action' => 'view'],
-
-            ['name' => 'Configurações — visualizar', 'slug' => 'settings.view', 'module' => 'configuracoes', 'action' => 'view'],
-            ['name' => 'Dados da empresa — visualizar', 'slug' => 'settings.company.view', 'module' => 'configuracoes', 'action' => 'view'],
         ];
+
+        return array_merge($fromConfig, $crud);
     }
 
     private static function seedRolePermissionsForMaster(PDO $pdo, int $roleId): void
