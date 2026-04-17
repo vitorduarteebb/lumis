@@ -1,38 +1,45 @@
-<div class="card app-card border-0 shadow-lg">
-    <div class="card-body p-4 p-md-5">
-        <div class="d-flex align-items-center gap-2 mb-4">
-            <div class="brand-mark rounded-2"></div>
-            <div>
-                <div class="fw-semibold text-white">Lumis ERP</div>
-                <div class="text-secondary small">Nova senha</div>
+<div class="lumis-auth-card">
+    <div class="lumis-auth-card__body">
+        <div class="lumis-auth-card__head">
+            <div class="lumis-auth-card__logo-row d-none d-lg-flex">
+                <div class="brand-mark rounded-3"></div>
+                <div>
+                    <h2 class="lumis-auth-card__title mb-0">Nova senha</h2>
+                    <p class="lumis-auth-card__subtitle">Defina uma senha forte para sua conta</p>
+                </div>
+            </div>
+            <div class="d-lg-none">
+                <h2 class="lumis-auth-card__title">Nova senha</h2>
+                <p class="lumis-auth-card__subtitle">Conta protegida</p>
             </div>
         </div>
 
         <?php if (!empty($error)): ?>
-            <div class="alert alert-danger border-0 small" role="alert"><?= htmlspecialchars((string) $error, ENT_QUOTES, 'UTF-8') ?></div>
+            <div class="lumis-alert-auth lumis-alert-auth--error" role="alert"><?= htmlspecialchars((string) $error, ENT_QUOTES, 'UTF-8') ?></div>
         <?php endif; ?>
         <?php if (!empty($success)): ?>
-            <div class="alert alert-success border-0 small" role="alert"><?= htmlspecialchars((string) $success, ENT_QUOTES, 'UTF-8') ?></div>
+            <div class="lumis-alert-auth lumis-alert-auth--success" role="alert"><?= htmlspecialchars((string) $success, ENT_QUOTES, 'UTF-8') ?></div>
         <?php endif; ?>
 
-        <form method="post" action="/password/reset" class="vstack gap-3" autocomplete="on">
+        <form method="post" action="/password/reset" autocomplete="on">
             <?= $csrfField ?>
             <input type="hidden" name="email" value="<?= htmlspecialchars((string) $email, ENT_QUOTES, 'UTF-8') ?>">
             <input type="hidden" name="token" value="<?= htmlspecialchars((string) $token, ENT_QUOTES, 'UTF-8') ?>">
 
-            <div>
-                <label class="form-label small text-secondary">Nova senha</label>
-                <input class="form-control form-control-lg app-input" name="password" type="password" required minlength="6" autocomplete="new-password">
-                <div class="form-text text-secondary small">Mínimo 6 caracteres.</div>
+            <div class="lumis-field">
+                <label for="reset-password">Nova senha</label>
+                <input class="lumis-input" id="reset-password" name="password" type="password" required minlength="6" autocomplete="new-password" placeholder="Mínimo 6 caracteres">
             </div>
-            <div>
-                <label class="form-label small text-secondary">Confirmar senha</label>
-                <input class="form-control form-control-lg app-input" name="password_confirmation" type="password" required minlength="6" autocomplete="new-password">
+            <div class="lumis-field">
+                <label for="reset-password-2">Confirmar senha</label>
+                <input class="lumis-input" id="reset-password-2" name="password_confirmation" type="password" required minlength="6" autocomplete="new-password" placeholder="Repita a senha">
             </div>
 
-            <button class="btn btn-primary btn-lg w-100" type="submit">Salvar nova senha</button>
-            <div class="text-secondary small">
-                <a class="text-decoration-none" href="/login">Voltar ao login</a>
+            <button class="lumis-btn-submit" type="submit">Salvar e entrar depois</button>
+
+            <div class="lumis-auth-meta">
+                <span style="color: var(--lumis-muted);">Token válido por tempo limitado</span>
+                <a href="/login">Voltar ao login</a>
             </div>
         </form>
     </div>
