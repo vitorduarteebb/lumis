@@ -36,6 +36,7 @@
 
   function applyDesktopCollapsed() {
     if (mqMobile.matches) {
+      body.classList.remove("app-sidebar-collapsed");
       return;
     }
     if (isCollapsedPreferred()) {

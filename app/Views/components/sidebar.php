@@ -67,7 +67,7 @@ $current = lumis_current_path();
                                     $cdisabled = !empty($child['disabled']);
                                     ?>
                                     <?php if ($cdisabled || $chref === '#'): ?>
-                                        <span class="nav-link nav-link--child disabled small"><?= htmlspecialchars($clabel, ENT_QUOTES, 'UTF-8') ?></span>
+                                        <span class="nav-link nav-link--child disabled small" title="Em breve — módulo em desenvolvimento"><?= htmlspecialchars($clabel, ENT_QUOTES, 'UTF-8') ?></span>
                                     <?php else: ?>
                                         <a class="nav-link nav-link--child small <?= lumis_nav_active($chref, 'prefix') ? 'active' : '' ?>" href="<?= htmlspecialchars($chref, ENT_QUOTES, 'UTF-8') ?>">
                                             <?= htmlspecialchars($clabel, ENT_QUOTES, 'UTF-8') ?>

@@ -915,7 +915,8 @@ body.app-sidebar-collapsed .nav-icon {
     margin: 0;
 }
 
-body.app-sidebar-collapsed .collapse {
+/* Só esconde submenus no modo ícone (desktop); não use seletor genérico .collapse em outras áreas da página */
+body.app-sidebar-collapsed .app-sidebar .nav-group > .collapse {
     display: none !important;
 }
 
@@ -951,10 +952,6 @@ body.app-sidebar-collapsed .app-sidebar__footer {
     body.app-sidebar-collapsed .app-sidebar__footer span:not(.badge),
     body.app-sidebar-collapsed .brand-sub {
         display: initial;
-    }
-
-    body.app-sidebar-collapsed .collapse {
-        display: block !important;
     }
 
     #appSidebarCollapse {
