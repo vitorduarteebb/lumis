@@ -7,7 +7,13 @@ declare(strict_types=1);
 
 $userName = (string) ($_SESSION['user_name'] ?? 'Usuário');
 $userEmail = (string) ($_SESSION['user_email'] ?? '');
-$initial = $userName !== '' ? mb_strtoupper(mb_substr($userName, 0, 1, 'UTF-8'), 'UTF-8') : '?';
+if ($userName === '') {
+    $initial = '?';
+} elseif (function_exists('mb_substr') && function_exists('mb_strtoupper')) {
+    $initial = mb_strtoupper(mb_substr($userName, 0, 1, 'UTF-8'), 'UTF-8');
+} else {
+    $initial = strtoupper(substr($userName, 0, 1));
+}
 ?>
 
 <header class="app-header app-header--sticky border-bottom">

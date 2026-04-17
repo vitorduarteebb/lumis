@@ -1,3 +1,13 @@
+<?php
+$kpis = isset($kpis) && is_array($kpis) ? $kpis : [];
+$activities = isset($activities) && is_array($activities) ? $activities : [];
+$alerts = isset($alerts) && is_array($alerts) ? $alerts : [];
+$shortcuts = isset($shortcuts) && is_array($shortcuts) ? $shortcuts : [];
+$chartSales = isset($chartSales) && is_array($chartSales) ? $chartSales : [];
+$chartCashflow = isset($chartCashflow) && is_array($chartCashflow) ? $chartCashflow : [];
+$calendar = isset($calendar) && is_array($calendar) ? $calendar : [];
+$userName = isset($userName) ? (string) $userName : 'Usuário';
+?>
 <div class="lumis-page-head">
     <div>
         <div class="lumis-page-head__meta">Visão geral</div>
@@ -12,6 +22,9 @@
 
 <div class="row g-3 mb-3">
     <?php foreach ($kpis as $kpi): ?>
+        <?php if (!is_array($kpi)) {
+            continue;
+        } ?>
         <div class="col-12 col-md-6 col-xl-3">
             <div class="lumis-kpi p-3">
                 <div class="d-flex align-items-start justify-content-between gap-2">
@@ -102,6 +115,9 @@
             <div class="lumis-card__body">
                 <div class="lumis-timeline">
                     <?php foreach ($activities as $row): ?>
+                        <?php if (!is_array($row)) {
+                            continue;
+                        } ?>
                         <div class="lumis-timeline__item">
                             <div class="lumis-timeline__dot" aria-hidden="true"></div>
                             <div class="min-w-0">
@@ -128,6 +144,9 @@
                 <div class="vstack gap-2">
                     <?php foreach ($alerts as $a): ?>
                         <?php
+                        if (!is_array($a)) {
+                            continue;
+                        }
                         $tone = (string) ($a['tone'] ?? 'info');
                         $cls = match ($tone) {
                             'warning' => 'lumis-alert--warning',
@@ -151,6 +170,9 @@
             <div class="lumis-card__body">
                 <div class="row g-2">
                     <?php foreach ($shortcuts as $sc): ?>
+                        <?php if (!is_array($sc)) {
+                            continue;
+                        } ?>
                         <div class="col-12">
                             <a class="btn btn-lumis-secondary w-100 d-flex align-items-center justify-content-start gap-2 <?= !empty($sc['disabled']) ? 'disabled' : '' ?>" href="<?= htmlspecialchars((string) ($sc['href'] ?? '#'), ENT_QUOTES, 'UTF-8') ?>">
                                 <i class="bi <?= htmlspecialchars((string) ($sc['icon'] ?? 'bi-link-45deg'), ENT_QUOTES, 'UTF-8') ?>" aria-hidden="true"></i>
@@ -173,8 +195,8 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.6/dist/chart.umd.min.js" crossorigin="anonymous"></script>
 <script>
 (() => {
-  const sales = <?= json_encode($chartSales ?? [], JSON_UNESCAPED_UNICODE) ?>;
-  const cash = <?= json_encode($chartCashflow ?? [], JSON_UNESCAPED_UNICODE) ?>;
+  const sales = <?= json_encode($chartSales, JSON_UNESCAPED_UNICODE) ?>;
+  const cash = <?= json_encode($chartCashflow, JSON_UNESCAPED_UNICODE) ?>;
   const months = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
 
   const commonOpts = {

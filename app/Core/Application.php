@@ -67,7 +67,12 @@ final class Application
                 'message' => $e->getMessage(),
             ], 'layouts/main');
         } catch (Throwable $e) {
-            $this->logger->error($e->getMessage(), ['exception' => $e]);
+            try {
+                $this->logger->error($e->getMessage(), ['exception' => $e]);
+            } catch (Throwable $logErr) {
+                error_log('[Lumis] Falha ao gravar log: ' . $logErr->getMessage());
+                error_log('[Lumis] Exceção original: ' . $e->getMessage() . ' em ' . $e->getFile() . ':' . $e->getLine());
+            }
             $debug = (bool) config('app.debug');
             http_response_code(500);
             if ($debug) {
