@@ -57,7 +57,30 @@ foreach ($rows as $row) {
 
 $roleId = (int) $pdo->query("SELECT id FROM roles WHERE slug = 'master' LIMIT 1")->fetchColumn();
 if ($roleId < 1) {
-    fwrite(STDERR, "Perfil master não encontrado.\n");
+    $insRole = $pdo->prepare(
+        'INSERT INTO roles (name, slug, description, created_at, updated_at)
+         VALUES (:name, :slug, :description, NOW(), NOW())'
+    );
+    try {
+        $insRole->execute([
+            'name' => 'Master',
+            'slug' => 'master',
+            'description' => 'Acesso total (criado por sync_permissions.php).',
+        ]);
+        $roleId = (int) $pdo->lastInsertId();
+    } catch (Throwable) {
+        $roleId = (int) $pdo->query("SELECT id FROM roles WHERE slug = 'master' LIMIT 1")->fetchColumn();
+    }
+}
+if ($roleId < 1) {
+    $fallback = (int) $pdo->query('SELECT id FROM roles ORDER BY id ASC LIMIT 1')->fetchColumn();
+    if ($fallback > 0) {
+        fwrite(STDERR, "Aviso: perfil com slug 'master' inexistente; usando role id {$fallback}. Crie um perfil com slug 'master' para o esperado pelo sistema.\n");
+        $roleId = $fallback;
+    }
+}
+if ($roleId < 1) {
+    fwrite(STDERR, "Nenhum perfil (role) encontrado na tabela roles. Rode o seed inicial ou crie um perfil manualmente.\n");
     exit(1);
 }
 

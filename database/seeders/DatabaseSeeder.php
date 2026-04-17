@@ -93,6 +93,11 @@ SQL;
 
     private static function seedMasterRole(PDO $pdo): int
     {
+        $existing = $pdo->query("SELECT id FROM roles WHERE slug = 'master' LIMIT 1")->fetchColumn();
+        if ($existing !== false && (int) $existing > 0) {
+            return (int) $existing;
+        }
+
         $stmt = $pdo->prepare(
             'INSERT INTO roles (name, slug, description, created_at, updated_at)
              VALUES (:name, :slug, :description, NOW(), NOW())'
@@ -102,6 +107,7 @@ SQL;
             'slug' => 'master',
             'description' => 'Acesso total ao sistema (via permissões atribuídas).',
         ]);
+
         return (int) $pdo->lastInsertId();
     }
 
@@ -109,7 +115,7 @@ SQL;
     {
         $rows = self::permissionDefinitions();
         $stmt = $pdo->prepare(
-            'INSERT INTO permissions (name, slug, module, action, created_at, updated_at)
+            'INSERT IGNORE INTO permissions (name, slug, module, action, created_at, updated_at)
              VALUES (:name, :slug, :module, :action, NOW(), NOW())'
         );
 
@@ -155,7 +161,9 @@ SQL;
     {
         $stmt = $pdo->query('SELECT id FROM permissions');
         $ids = $stmt->fetchAll(PDO::FETCH_COLUMN);
-        $ins = $pdo->prepare('INSERT INTO role_permissions (role_id, permission_id) VALUES (:role_id, :permission_id)');
+        $ins = $pdo->prepare(
+            'INSERT IGNORE INTO role_permissions (role_id, permission_id) VALUES (:role_id, :permission_id)'
+        );
         foreach ($ids as $pid) {
             $ins->execute([
                 'role_id' => $roleId,
