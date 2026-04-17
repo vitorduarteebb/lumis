@@ -1,0 +1,12 @@
+/vendor/
+composer.phar
+.env
+/storage/logs/*.log
+/storage/cache/*
+!/storage/cache/.gitkeep
+!/storage/logs/.gitkeep
+/public/uploads/*
+!/public/uploads/.gitkeep
+.idea/
+.vscode/
+*.cache
