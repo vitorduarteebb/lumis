@@ -2,7 +2,11 @@
 
 declare(strict_types=1);
 
+use App\Controllers\CadastrosLookupController;
+use App\Controllers\CarriersController;
 use App\Controllers\ClientsController;
+use App\Controllers\ConfiguracoesController;
+use App\Controllers\EmployeesController;
 use App\Controllers\ProdutosController;
 use App\Controllers\ServicosController;
 use App\Controllers\SuppliersController;
@@ -50,7 +54,36 @@ return static function (Router $router): void {
     $router->post('/cadastros/fornecedores/{id}', [SuppliersController::class, 'update'], $m('cadastros.fornecedores.edit', ['suppliers.edit']));
     $router->get('/cadastros/fornecedores/{id}', [SuppliersController::class, 'show'], $m('cadastros.fornecedores.view', ['suppliers.view']));
 
+    /* ========== Cadastros — Funcionários ========== */
+    $router->get('/cadastros/funcionarios/novo', [EmployeesController::class, 'create'], $m('cadastros.funcionarios.create', ['employees.create']));
+    $router->post('/cadastros/funcionarios', [EmployeesController::class, 'store'], $m('cadastros.funcionarios.create', ['employees.create']));
+    $router->get('/cadastros/funcionarios', [EmployeesController::class, 'index'], $m('cadastros.funcionarios.view', ['employees.view']));
+    $router->get('/cadastros/funcionarios/{id}/editar', [EmployeesController::class, 'edit'], $m('cadastros.funcionarios.edit', ['employees.edit']));
+    $router->post('/cadastros/funcionarios/{id}/excluir', [EmployeesController::class, 'destroy'], $m('cadastros.funcionarios.delete', ['employees.delete']));
+    $router->post('/cadastros/funcionarios/{id}', [EmployeesController::class, 'update'], $m('cadastros.funcionarios.edit', ['employees.edit']));
+    $router->get('/cadastros/funcionarios/{id}', [EmployeesController::class, 'show'], $m('cadastros.funcionarios.view', ['employees.view']));
+
+    /* ========== Cadastros — Transportadoras ========== */
+    $router->get('/cadastros/transportadoras/novo', [CarriersController::class, 'create'], $m('cadastros.transportadoras.create', ['carriers.create']));
+    $router->post('/cadastros/transportadoras', [CarriersController::class, 'store'], $m('cadastros.transportadoras.create', ['carriers.create']));
+    $router->get('/cadastros/transportadoras', [CarriersController::class, 'index'], $m('cadastros.transportadoras.view', ['carriers.view']));
+    $router->get('/cadastros/transportadoras/{id}/editar', [CarriersController::class, 'edit'], $m('cadastros.transportadoras.edit', ['carriers.edit']));
+    $router->post('/cadastros/transportadoras/{id}/excluir', [CarriersController::class, 'destroy'], $m('cadastros.transportadoras.delete', ['carriers.delete']));
+    $router->post('/cadastros/transportadoras/{id}', [CarriersController::class, 'update'], $m('cadastros.transportadoras.edit', ['carriers.edit']));
+    $router->get('/cadastros/transportadoras/{id}', [CarriersController::class, 'show'], $m('cadastros.transportadoras.view', ['carriers.view']));
+
+    /* ========== Cadastros — Opções auxiliares (lookups) ========== */
+    $router->get('/cadastros/opcoes-auxiliares/novo', [CadastrosLookupController::class, 'create'], $m('cadastros.opcoes_auxiliares.create'));
+    $router->post('/cadastros/opcoes-auxiliares', [CadastrosLookupController::class, 'store'], $m('cadastros.opcoes_auxiliares.create'));
+    $router->get('/cadastros/opcoes-auxiliares', [CadastrosLookupController::class, 'index'], $m('cadastros.opcoes_auxiliares.view'));
+    $router->get('/cadastros/opcoes-auxiliares/{id}/editar', [CadastrosLookupController::class, 'edit'], $m('cadastros.opcoes_auxiliares.edit'));
+    $router->post('/cadastros/opcoes-auxiliares/{id}/excluir', [CadastrosLookupController::class, 'destroy'], $m('cadastros.opcoes_auxiliares.delete'));
+    $router->post('/cadastros/opcoes-auxiliares/{id}', [CadastrosLookupController::class, 'update'], $m('cadastros.opcoes_auxiliares.edit'));
+
     /* ========== Produtos — submenus estáticos (antes de /{id}) ========== */
+    $router->post('/produtos/valores-venda', [ProdutosController::class, 'valoresVendaSave'], $m('produtos.valores_venda.edit'));
+    $router->post('/produtos/etiquetas/imprimir', [ProdutosController::class, 'etiquetasImprimir'], $m('produtos.etiquetas.print'));
+    $router->post('/produtos/opcoes-auxiliares', [ProdutosController::class, 'opcoesCatalogoPost'], $m('produtos.opcoes_auxiliares.edit'));
     $router->get('/produtos/valores-venda', [ProdutosController::class, 'valoresVenda'], $m('produtos.valores_venda.view'));
     $router->get('/produtos/etiquetas', [ProdutosController::class, 'etiquetas'], $m('produtos.etiquetas.view'));
     $router->get('/produtos/opcoes-auxiliares', [ProdutosController::class, 'opcoesAuxiliares'], $m('produtos.opcoes_auxiliares.view'));
@@ -63,6 +96,21 @@ return static function (Router $router): void {
     $router->post('/produtos/{id}/excluir', [ProdutosController::class, 'destroy'], $m('produtos.gerenciar.delete', ['products.delete']));
     $router->post('/produtos/{id}', [ProdutosController::class, 'update'], $m('produtos.gerenciar.edit', ['products.edit']));
     $router->get('/produtos/{id}', [ProdutosController::class, 'show'], $m('produtos.gerenciar.view', ['products.view']));
+
+    /* ========== Configurações — POST e rotas estáticas (antes de module_routes) ========== */
+    $router->post('/configuracoes/gerais', [ConfiguracoesController::class, 'geraisSave'], $m('configuracoes.gerais.edit'));
+    $router->post('/configuracoes/meu-plano', [ConfiguracoesController::class, 'meuPlanoSave'], $m('configuracoes.meu_plano.edit'));
+    $router->post('/configuracoes/dados-empresa', [ConfiguracoesController::class, 'dadosEmpresaSave'], $m('configuracoes.dados_empresa.edit'));
+    $router->post('/configuracoes/marca-empresa', [ConfiguracoesController::class, 'marcaEmpresaSave'], $m('configuracoes.marca_empresa.edit'));
+    $router->post('/configuracoes/empresas-lojas', [ConfiguracoesController::class, 'empresasLojasStore'], $m('configuracoes.empresas_lojas.edit'));
+    $router->post('/configuracoes/certificado-digital', [ConfiguracoesController::class, 'certificadoDigitalSave'], $m('configuracoes.certificado_digital.edit'));
+    $router->post('/configuracoes/certificado-digital/excluir', [ConfiguracoesController::class, 'certificadoDigitalDelete'], $m('configuracoes.certificado_digital.edit'));
+    $router->post('/configuracoes/avisos-email', [ConfiguracoesController::class, 'avisosEmailSave'], $m('configuracoes.avisos_email.edit'));
+    $router->get('/configuracoes/modelos-email/novo', [ConfiguracoesController::class, 'modelosEmailNovo'], $m('configuracoes.modelos_email.edit'));
+    $router->post('/configuracoes/modelos-email', [ConfiguracoesController::class, 'modelosEmailStore'], $m('configuracoes.modelos_email.edit'));
+    $router->get('/configuracoes/modelos-email/{id}/editar', [ConfiguracoesController::class, 'modelosEmailEditar'], $m('configuracoes.modelos_email.edit'));
+    $router->post('/configuracoes/modelos-email/{id}/excluir', [ConfiguracoesController::class, 'modelosEmailDestroy'], $m('configuracoes.modelos_email.edit'));
+    $router->post('/configuracoes/modelos-email/{id}', [ConfiguracoesController::class, 'modelosEmailUpdate'], $m('configuracoes.modelos_email.edit'));
 
     /* ========== Serviços — CRUD ========== */
     $router->get('/servicos/novo', [ServicosController::class, 'create'], $m('servicos.gerenciar.create', ['services.create']));

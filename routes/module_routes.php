@@ -3,7 +3,6 @@
 declare(strict_types=1);
 
 use App\Controllers\AtendimentosController;
-use App\Controllers\CadastrosController;
 use App\Controllers\ConfiguracoesController;
 use App\Controllers\ContratosController;
 use App\Controllers\EstoqueController;
@@ -28,10 +27,7 @@ return static function (Router $router): void {
         new PermissionMiddleware($permission, $aliases),
     ];
 
-    /* Cadastros */
-    $router->get('/cadastros/funcionarios', [CadastrosController::class, 'funcionarios'], $m('cadastros.funcionarios.view', ['employees.view']));
-    $router->get('/cadastros/transportadoras', [CadastrosController::class, 'transportadoras'], $m('cadastros.transportadoras.view', ['carriers.view']));
-    $router->get('/cadastros/opcoes-auxiliares', [CadastrosController::class, 'opcoesAuxiliares'], $m('cadastros.opcoes_auxiliares.view'));
+    /* Cadastros — CRUD em crud_routes.php */
 
     /* Produtos — rotas CRUD e submenus em crud_routes.php */
 

@@ -4,18 +4,19 @@ declare(strict_types=1);
 
 namespace App\Controllers;
 
-use App\Controllers\Concerns\RendersModulePlaceholder;
 use App\Core\Controller;
 use App\Core\Request;
 use App\Helpers\Csrf;
 use App\Helpers\Session;
+use App\Repositories\PriceListRepository;
+use App\Repositories\ProductCatalogRepository;
 use App\Repositories\ProductRepository;
 
 final class ProdutosController extends Controller
 {
-    use RendersModulePlaceholder;
-
     private const PER_PAGE = 15;
+
+    private const CATALOG_PER_PAGE = 20;
 
     public function index(Request $request): string
     {
@@ -248,35 +249,192 @@ final class ProdutosController extends Controller
 
     public function valoresVenda(Request $request): string
     {
-        return $this->modulePlaceholder([
+        $cid = $this->requireCompany();
+        $pl = new PriceListRepository();
+        $defaultId = $pl->ensureDefault($cid);
+        $listId = (int) $request->input('list_id', $defaultId);
+        if ($listId < 1) {
+            $listId = $defaultId;
+        }
+        $lists = $pl->listByCompany($cid);
+        $current = $pl->findByIdForCompany($listId, $cid);
+        if ($current === null) {
+            $listId = $defaultId;
+        }
+        $rows = $pl->productsWithPrices($cid, $listId);
+
+        return $this->view('produtos/valores_venda', [
             'title' => 'Valores de venda',
+            'pageTitle' => 'Valores de venda',
             'breadcrumbs' => [
                 ['label' => 'Início', 'href' => '/dashboard'],
                 ['label' => 'Produtos', 'href' => null],
                 ['label' => 'Valores de venda', 'href' => null],
             ],
-            'description' => 'Tabelas de preço, regras por canal, descontos e vigência — integradas ao catálogo e ao PDV.',
-            'icon' => 'bi-currency-dollar',
+            'priceLists' => $lists,
+            'listId' => $listId,
+            'rows' => $rows,
         ]);
+    }
+
+    public function valoresVendaSave(Request $request): string
+    {
+        $cid = $this->requireCompany();
+        if (!Csrf::validate($request->input('_csrf_token'))) {
+            Session::flash('error', 'Sessão expirada.');
+            redirect('/produtos/valores-venda');
+        }
+        $pl = new PriceListRepository();
+        $pl->ensureDefault($cid);
+        $action = (string) $request->input('_action', 'save_prices');
+
+        if ($action === 'create_list') {
+            $name = trim((string) $request->input('new_list_name', ''));
+            if ($name === '') {
+                Session::flash('error', 'Informe o nome da nova tabela de preço.');
+                redirect('/produtos/valores-venda');
+            }
+            $newId = $pl->createList($cid, $name);
+            Session::flash('success', 'Tabela de preço criada.');
+            redirect('/produtos/valores-venda?list_id=' . $newId);
+        }
+
+        if ($action === 'set_default') {
+            $listId = (int) $request->input('list_id', 0);
+            if ($listId < 1 || $pl->findByIdForCompany($listId, $cid) === null) {
+                Session::flash('error', 'Tabela inválida.');
+                redirect('/produtos/valores-venda');
+            }
+            $pl->setDefault($listId, $cid);
+            Session::flash('success', 'Tabela padrão atualizada.');
+            redirect('/produtos/valores-venda?list_id=' . $listId);
+        }
+
+        $listId = (int) $request->input('list_id', 0);
+        if ($listId < 1 || $pl->findByIdForCompany($listId, $cid) === null) {
+            Session::flash('error', 'Tabela de preço inválida.');
+            redirect('/produtos/valores-venda');
+        }
+
+        $prices = $request->input('prices', []);
+        if (!is_array($prices)) {
+            $prices = [];
+        }
+        $prodRepo = new ProductRepository();
+        foreach ($prices as $pidRaw => $rawPrice) {
+            $pid = (int) $pidRaw;
+            if ($pid < 1) {
+                continue;
+            }
+            if ($prodRepo->findByIdForCompany($pid, $cid) === null) {
+                continue;
+            }
+            $p = trim((string) $rawPrice);
+            $p = str_replace(',', '.', $p);
+            if ($p === '' || !is_numeric($p)) {
+                continue;
+            }
+            $pl->upsertItem($listId, $pid, (string) round((float) $p, 4));
+        }
+        Session::flash('success', 'Preços da tabela atualizados.');
+        redirect('/produtos/valores-venda?list_id=' . $listId);
     }
 
     public function etiquetas(Request $request): string
     {
-        return $this->modulePlaceholder([
+        $cid = $this->requireCompany();
+        $q = trim((string) $request->input('q', ''));
+        $page = max(1, (int) $request->input('page', 1));
+        $repo = new ProductRepository();
+        $result = $repo->paginate($cid, $q, '1', null, $page, self::PER_PAGE);
+        $totalPages = $result['total'] > 0 ? max(1, (int) ceil($result['total'] / self::PER_PAGE)) : 1;
+
+        return $this->view('produtos/etiquetas', [
             'title' => 'Etiquetas',
+            'pageTitle' => 'Etiquetas',
             'breadcrumbs' => [
                 ['label' => 'Início', 'href' => '/dashboard'],
                 ['label' => 'Produtos', 'href' => null],
                 ['label' => 'Etiquetas', 'href' => null],
             ],
-            'description' => 'Layouts de etiquetas, impressão em lote e códigos de barras para gôndola e expedição.',
-            'icon' => 'bi-printer',
+            'rows' => $result['rows'],
+            'total' => $result['total'],
+            'page' => $page,
+            'totalPages' => $totalPages,
+            'search' => $q,
+            'basePath' => '/produtos/etiquetas',
+            'queryParams' => array_filter(['q' => $q !== '' ? $q : null]),
         ]);
+    }
+
+    public function etiquetasImprimir(Request $request): string
+    {
+        $cid = $this->requireCompany();
+        if (!Csrf::validate($request->input('_csrf_token'))) {
+            Session::flash('error', 'Sessão expirada.');
+            redirect('/produtos/etiquetas');
+        }
+        $qty = $request->input('qty', []);
+        if (!is_array($qty)) {
+            $qty = [];
+        }
+        $ids = [];
+        foreach ($qty as $pidRaw => $n) {
+            $pid = (int) $pidRaw;
+            $c = max(0, (int) $n);
+            if ($pid > 0 && $c > 0) {
+                $ids[$pid] = $c;
+            }
+        }
+        if ($ids === []) {
+            Session::flash('error', 'Selecione quantidades maiores que zero para ao menos um produto.');
+            redirect('/produtos/etiquetas');
+        }
+        $repo = new ProductRepository();
+        $idList = array_keys($ids);
+        $products = $repo->findByIdsForCompany($idList, $cid);
+        $lines = [];
+        foreach ($products as $p) {
+            $pid = (int) $p['id'];
+            $lines[] = [
+                'product' => $p,
+                'qty' => $ids[$pid] ?? 1,
+            ];
+        }
+
+        return $this->view('produtos/etiquetas_print', [
+            'title' => 'Impressão de etiquetas',
+            'lines' => $lines,
+        ], null);
     }
 
     public function opcoesAuxiliares(Request $request): string
     {
-        return $this->modulePlaceholder([
+        $cid = $this->requireCompany();
+        $tab = (string) $request->input('tab', 'categorias');
+        if (!in_array($tab, ['categorias', 'marcas', 'unidades'], true)) {
+            $tab = 'categorias';
+        }
+        $q = trim((string) $request->input('q', ''));
+        $page = max(1, (int) $request->input('page', 1));
+        $cat = new ProductCatalogRepository();
+
+        $categories = ['rows' => [], 'total' => 0];
+        $brands = ['rows' => [], 'total' => 0];
+        $units = ['rows' => [], 'total' => 0];
+
+        if ($tab === 'categorias') {
+            $categories = $cat->categoriesPaginate($cid, $q, $page, self::CATALOG_PER_PAGE);
+        } elseif ($tab === 'marcas') {
+            $brands = $cat->brandsPaginate($cid, $q, $page, self::CATALOG_PER_PAGE);
+        } else {
+            $units = $cat->unitsPaginate($cid, $q, $page, self::CATALOG_PER_PAGE);
+        }
+
+        $totalForTab = $tab === 'categorias' ? $categories['total'] : ($tab === 'marcas' ? $brands['total'] : $units['total']);
+        $totalPages = $totalForTab > 0 ? max(1, (int) ceil($totalForTab / self::CATALOG_PER_PAGE)) : 1;
+
+        return $this->view('produtos/opcoes_auxiliares', [
             'title' => 'Opções auxiliares — Produtos',
             'pageTitle' => 'Opções auxiliares',
             'breadcrumbs' => [
@@ -284,9 +442,189 @@ final class ProdutosController extends Controller
                 ['label' => 'Produtos', 'href' => null],
                 ['label' => 'Opções auxiliares', 'href' => null],
             ],
-            'description' => 'Marcas, famílias, unidades de medida e demais tabelas de apoio ao catálogo.',
-            'icon' => 'bi-sliders',
+            'tab' => $tab,
+            'search' => $q,
+            'page' => $page,
+            'total' => $totalForTab,
+            'totalPages' => $totalPages,
+            'categoriesRows' => $categories['rows'],
+            'brandsRows' => $brands['rows'],
+            'unitsRows' => $units['rows'],
+            'basePath' => '/produtos/opcoes-auxiliares',
+            'queryParams' => array_filter([
+                'tab' => $tab,
+                'q' => $q !== '' ? $q : null,
+            ]),
         ]);
+    }
+
+    public function opcoesCatalogoPost(Request $request): string
+    {
+        $cid = $this->requireCompany();
+        if (!Csrf::validate($request->input('_csrf_token'))) {
+            Session::flash('error', 'Sessão expirada.');
+            redirect('/produtos/opcoes-auxiliares');
+        }
+        $cat = new ProductCatalogRepository();
+        $action = (string) $request->input('_action', '');
+        $tab = (string) $request->input('tab', 'categorias');
+        $redir = '/produtos/opcoes-auxiliares?tab=' . rawurlencode($tab);
+
+        if ($action === 'create_category') {
+            $name = trim((string) $request->input('name', ''));
+            if ($name === '') {
+                Session::flash('error', 'Informe o nome da categoria.');
+                redirect($redir);
+            }
+            $slug = trim((string) $request->input('slug', ''));
+            if ($slug === '') {
+                $slug = lumis_slugify($name);
+            }
+            if ($cat->categorySlugExists($cid, $slug, null)) {
+                Session::flash('error', 'Já existe uma categoria com este slug.');
+                redirect($redir);
+            }
+            $st = (int) $request->input('status', 1) === 0 ? 0 : 1;
+            $cat->insertCategory($cid, $name, $slug, $st);
+            Session::flash('success', 'Categoria criada.');
+            redirect($redir);
+        }
+
+        if ($action === 'update_category') {
+            $id = (int) $request->input('id', 0);
+            $row = $id > 0 ? $cat->findCategory($id, $cid) : null;
+            if ($row === null) {
+                Session::flash('error', 'Categoria não encontrada.');
+                redirect($redir);
+            }
+            $name = trim((string) $request->input('name', ''));
+            $slug = trim((string) $request->input('slug', ''));
+            if ($name === '' || $slug === '') {
+                Session::flash('error', 'Nome e slug são obrigatórios.');
+                redirect($redir);
+            }
+            if ($cat->categorySlugExists($cid, $slug, $id)) {
+                Session::flash('error', 'Slug já em uso por outra categoria.');
+                redirect($redir);
+            }
+            $st = (int) $request->input('status', 1) === 0 ? 0 : 1;
+            $cat->updateCategory($id, $cid, $name, $slug, $st);
+            Session::flash('success', 'Categoria atualizada.');
+            redirect($redir);
+        }
+
+        if ($action === 'delete_category') {
+            $id = (int) $request->input('id', 0);
+            $rowCat = $id > 0 ? $cat->findCategory($id, $cid) : null;
+            if ($rowCat === null) {
+                Session::flash('error', 'Categoria não encontrada.');
+                redirect($redir);
+            }
+            if ($cat->countProductsUsingCategory($id, $cid) > 0) {
+                Session::flash('error', 'Não é possível inativar: existem produtos vinculados a esta categoria.');
+                redirect($redir);
+            }
+            $cat->updateCategory($id, $cid, (string) $rowCat['name'], (string) $rowCat['slug'], 0);
+            Session::flash('success', 'Categoria inativada.');
+            redirect($redir);
+        }
+
+        if ($action === 'create_brand') {
+            $name = trim((string) $request->input('name', ''));
+            if ($name === '') {
+                Session::flash('error', 'Informe o nome da marca.');
+                redirect($redir);
+            }
+            $st = (int) $request->input('status', 1) === 0 ? 0 : 1;
+            $cat->insertBrand($cid, $name, $st);
+            Session::flash('success', 'Marca criada.');
+            redirect($redir);
+        }
+
+        if ($action === 'update_brand') {
+            $id = (int) $request->input('id', 0);
+            $row = $id > 0 ? $cat->findBrand($id, $cid) : null;
+            if ($row === null) {
+                Session::flash('error', 'Marca não encontrada.');
+                redirect($redir);
+            }
+            $name = trim((string) $request->input('name', ''));
+            if ($name === '') {
+                Session::flash('error', 'Informe o nome da marca.');
+                redirect($redir);
+            }
+            $st = (int) $request->input('status', 1) === 0 ? 0 : 1;
+            $cat->updateBrand($id, $cid, $name, $st);
+            Session::flash('success', 'Marca atualizada.');
+            redirect($redir);
+        }
+
+        if ($action === 'delete_brand') {
+            $id = (int) $request->input('id', 0);
+            $row = $id > 0 ? $cat->findBrand($id, $cid) : null;
+            if ($row === null) {
+                Session::flash('error', 'Marca não encontrada.');
+                redirect($redir);
+            }
+            if ($cat->countProductsUsingBrand($id, $cid) > 0) {
+                Session::flash('error', 'Não é possível inativar: existem produtos vinculados a esta marca.');
+                redirect($redir);
+            }
+            $cat->updateBrand($id, $cid, (string) $row['name'], 0);
+            Session::flash('success', 'Marca inativada.');
+            redirect($redir);
+        }
+
+        if ($action === 'create_unit') {
+            $name = trim((string) $request->input('name', ''));
+            $abbr = trim((string) $request->input('abbreviation', ''));
+            if ($name === '' || $abbr === '') {
+                Session::flash('error', 'Nome e abreviação são obrigatórios.');
+                redirect($redir);
+            }
+            $st = (int) $request->input('status', 1) === 0 ? 0 : 1;
+            $cat->insertUnit($cid, $name, $abbr, $st);
+            Session::flash('success', 'Unidade criada.');
+            redirect($redir);
+        }
+
+        if ($action === 'update_unit') {
+            $id = (int) $request->input('id', 0);
+            $row = $id > 0 ? $cat->findUnit($id, $cid) : null;
+            if ($row === null) {
+                Session::flash('error', 'Unidade não encontrada.');
+                redirect($redir);
+            }
+            $name = trim((string) $request->input('name', ''));
+            $abbr = trim((string) $request->input('abbreviation', ''));
+            if ($name === '' || $abbr === '') {
+                Session::flash('error', 'Nome e abreviação são obrigatórios.');
+                redirect($redir);
+            }
+            $st = (int) $request->input('status', 1) === 0 ? 0 : 1;
+            $cat->updateUnit($id, $cid, $name, $abbr, $st);
+            Session::flash('success', 'Unidade atualizada.');
+            redirect($redir);
+        }
+
+        if ($action === 'delete_unit') {
+            $id = (int) $request->input('id', 0);
+            $row = $id > 0 ? $cat->findUnit($id, $cid) : null;
+            if ($row === null) {
+                Session::flash('error', 'Unidade não encontrada.');
+                redirect($redir);
+            }
+            if ($cat->countProductsUsingUnit($id, $cid) > 0) {
+                Session::flash('error', 'Não é possível inativar: existem produtos vinculados a esta unidade.');
+                redirect($redir);
+            }
+            $cat->updateUnit($id, $cid, (string) $row['name'], (string) $row['abbreviation'], 0);
+            Session::flash('success', 'Unidade inativada.');
+            redirect($redir);
+        }
+
+        Session::flash('error', 'Ação inválida.');
+        redirect($redir);
     }
 
     /**

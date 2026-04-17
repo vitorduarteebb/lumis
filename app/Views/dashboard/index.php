@@ -6,17 +6,19 @@ $shortcuts = isset($shortcuts) && is_array($shortcuts) ? $shortcuts : [];
 $chartSales = isset($chartSales) && is_array($chartSales) ? $chartSales : [];
 $chartCashflow = isset($chartCashflow) && is_array($chartCashflow) ? $chartCashflow : [];
 $calendar = isset($calendar) && is_array($calendar) ? $calendar : [];
+$chartLabels = isset($chartLabels) && is_array($chartLabels) ? $chartLabels : [];
+$supportTickets = isset($supportTickets) && is_array($supportTickets) ? $supportTickets : [];
 $userName = isset($userName) ? (string) $userName : 'Usuário';
 ?>
 <div class="lumis-page-head">
     <div>
         <div class="lumis-page-head__meta">Visão geral</div>
         <h2 class="h4 mb-1 text-white">Olá, <?= htmlspecialchars($userName, ENT_QUOTES, 'UTF-8') ?></h2>
-        <div class="text-secondary small">Resumo operacional · dados ilustrativos até a Fase 4</div>
+        <div class="text-secondary small">Resumo operacional · dados da empresa atual</div>
     </div>
     <div class="d-flex flex-wrap gap-2">
-        <button type="button" class="btn btn-sm btn-lumis-secondary" disabled>Exportar</button>
-        <button type="button" class="btn btn-sm btn-primary" disabled>Nova ação</button>
+        <a class="btn btn-sm btn-lumis-secondary" href="/relatorios/cadastros">Relatórios</a>
+        <a class="btn btn-sm btn-primary" href="/cadastros/clientes/novo">Novo cadastro</a>
     </div>
 </div>
 
@@ -47,7 +49,7 @@ $userName = isset($userName) ? (string) $userName : 'Usuário';
         <div class="lumis-card">
             <div class="lumis-card__head">
                 <h3 class="lumis-card__title">Vendas (últimos 12 meses)</h3>
-                <span class="badge badge-lumis badge-lumis-neutral">placeholder</span>
+                <span class="badge badge-lumis badge-lumis-success small">documentos de venda</span>
             </div>
             <div class="lumis-card__body">
                 <div style="height: 280px;">
@@ -59,8 +61,8 @@ $userName = isset($userName) ? (string) $userName : 'Usuário';
     <div class="col-lg-4">
         <div class="lumis-card mb-3">
             <div class="lumis-card__head">
-                <h3 class="lumis-card__title">Fluxo de caixa</h3>
-                <span class="badge badge-lumis badge-lumis-neutral">placeholder</span>
+                <h3 class="lumis-card__title">Fluxo (proxy)</h3>
+                <span class="badge badge-lumis badge-lumis-neutral small">estimativa</span>
             </div>
             <div class="lumis-card__body">
                 <div style="height: 220px;">
@@ -86,7 +88,7 @@ $userName = isset($userName) ? (string) $userName : 'Usuário';
                 <div class="lumis-cal">
                     <div class="lumis-cal__head">
                         <div class="fw-semibold text-white"><?= htmlspecialchars((string) ($cal['month'] ?? ''), ENT_QUOTES, 'UTF-8') ?> <span class="text-secondary fw-normal"><?= htmlspecialchars((string) ($cal['year'] ?? ''), ENT_QUOTES, 'UTF-8') ?></span></div>
-                        <span class="badge badge-lumis badge-lumis-neutral small">preview</span>
+                        <span class="badge badge-lumis badge-lumis-neutral small">mês atual</span>
                     </div>
                     <div class="lumis-cal__grid">
                         <?php foreach (['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb', 'Dom'] as $dow): ?>
@@ -110,7 +112,7 @@ $userName = isset($userName) ? (string) $userName : 'Usuário';
         <div class="lumis-card h-100">
             <div class="lumis-card__head">
                 <h3 class="lumis-card__title">Atividades recentes</h3>
-                <a class="small text-decoration-none" href="#">Ver tudo</a>
+                <a class="small text-decoration-none" href="/relatorios/logs-sistema">Ver logs</a>
             </div>
             <div class="lumis-card__body">
                 <div class="lumis-timeline">
@@ -184,11 +186,22 @@ $userName = isset($userName) ? (string) $userName : 'Usuário';
             </div>
         </div>
 
-        <div class="lumis-empty mt-3">
-            <div class="lumis-empty__icon"><i class="bi bi-inboxes" aria-hidden="true"></i></div>
-            <div class="fw-semibold text-white">Nenhum widget extra</div>
-            <div class="small">Este bloco demonstra <span class="text-white">empty state</span> para listagens futuras.</div>
-        </div>
+        <?php if ($supportTickets !== []): ?>
+            <div class="lumis-card mt-3">
+                <div class="lumis-card__head">
+                    <h3 class="lumis-card__title">Chamados recentes</h3>
+                </div>
+                <div class="lumis-card__body small">
+                    <?php foreach ($supportTickets as $tk): ?>
+                        <?php if (!is_array($tk)) { continue; } ?>
+                        <div class="d-flex justify-content-between border-bottom border-secondary-subtle py-2">
+                            <span class="text-white text-truncate me-2"><?= htmlspecialchars((string) ($tk['subject'] ?? ''), ENT_QUOTES, 'UTF-8') ?></span>
+                            <span class="text-secondary text-nowrap"><?= htmlspecialchars((string) ($tk['status'] ?? ''), ENT_QUOTES, 'UTF-8') ?></span>
+                        </div>
+                    <?php endforeach; ?>
+                </div>
+            </div>
+        <?php endif; ?>
     </div>
 </div>
 
@@ -197,7 +210,7 @@ $userName = isset($userName) ? (string) $userName : 'Usuário';
 (() => {
   const sales = <?= json_encode($chartSales, JSON_UNESCAPED_UNICODE) ?>;
   const cash = <?= json_encode($chartCashflow, JSON_UNESCAPED_UNICODE) ?>;
-  const months = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+  const months = <?= json_encode($chartLabels ?? [], JSON_UNESCAPED_UNICODE) ?>;
 
   const commonOpts = {
     responsive: true,
@@ -234,7 +247,7 @@ $userName = isset($userName) ? (string) $userName : 'Usuário';
   new Chart(el2, {
     type: 'bar',
     data: {
-      labels: months.slice(0, cash.length),
+      labels: months.slice(0, Math.min(months.length, cash.length)),
       datasets: [{
         label: 'Fluxo',
         data: cash,

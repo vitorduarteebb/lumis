@@ -1,0 +1,276 @@
+-- Lumis ERP — Bloco 1: perfil da empresa, cadastros estendidos, financeiro mínimo, vendas/OS para dashboard
+SET NAMES utf8mb4;
+
+CREATE TABLE IF NOT EXISTS company_profiles (
+  company_id BIGINT UNSIGNED NOT NULL,
+  legal_name VARCHAR(255) NULL,
+  document_cnpj VARCHAR(20) NULL,
+  state_registration VARCHAR(30) NULL,
+  municipal_registration VARCHAR(30) NULL,
+  email VARCHAR(255) NULL,
+  phone VARCHAR(30) NULL,
+  mobile VARCHAR(30) NULL,
+  cep VARCHAR(12) NULL,
+  street VARCHAR(255) NULL,
+  address_number VARCHAR(30) NULL,
+  complement VARCHAR(120) NULL,
+  district VARCHAR(120) NULL,
+  city VARCHAR(120) NULL,
+  state VARCHAR(2) NULL,
+  timezone VARCHAR(64) NULL DEFAULT 'America/Sao_Paulo',
+  locale VARCHAR(16) NULL DEFAULT 'pt_BR',
+  logo_path VARCHAR(500) NULL,
+  primary_color VARCHAR(16) NULL,
+  accent_color VARCHAR(16) NULL,
+  notes TEXT NULL,
+  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (company_id),
+  CONSTRAINT fk_cp_company FOREIGN KEY (company_id) REFERENCES companies (id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS company_subscriptions (
+  id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+  company_id BIGINT UNSIGNED NOT NULL,
+  plan_name VARCHAR(120) NOT NULL DEFAULT 'Standard',
+  status VARCHAR(32) NOT NULL DEFAULT 'active',
+  max_users INT UNSIGNED NOT NULL DEFAULT 50,
+  renews_at DATE NULL,
+  notes VARCHAR(500) NULL,
+  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (id),
+  UNIQUE KEY uq_sub_company (company_id),
+  CONSTRAINT fk_sub_company FOREIGN KEY (company_id) REFERENCES companies (id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS lookup_entries (
+  id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+  company_id BIGINT UNSIGNED NOT NULL,
+  entry_type VARCHAR(40) NOT NULL COMMENT 'client_type, job_title, classification, etc.',
+  name VARCHAR(180) NOT NULL,
+  slug VARCHAR(120) NOT NULL,
+  sort_order INT NOT NULL DEFAULT 0,
+  status TINYINT UNSIGNED NOT NULL DEFAULT 1,
+  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  deleted_at DATETIME NULL,
+  PRIMARY KEY (id),
+  UNIQUE KEY uq_lookup_company_type_slug (company_id, entry_type, slug),
+  KEY idx_lookup_company_type (company_id, entry_type),
+  CONSTRAINT fk_lookup_company FOREIGN KEY (company_id) REFERENCES companies (id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS employees (
+  id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+  company_id BIGINT UNSIGNED NOT NULL,
+  name VARCHAR(255) NOT NULL,
+  document VARCHAR(20) NULL,
+  job_title VARCHAR(120) NULL,
+  email VARCHAR(255) NULL,
+  phone VARCHAR(30) NULL,
+  hire_date DATE NULL,
+  status TINYINT UNSIGNED NOT NULL DEFAULT 1,
+  notes TEXT NULL,
+  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  deleted_at DATETIME NULL,
+  created_by BIGINT UNSIGNED NULL,
+  updated_by BIGINT UNSIGNED NULL,
+  PRIMARY KEY (id),
+  KEY idx_emp_company (company_id),
+  KEY idx_emp_deleted (deleted_at),
+  CONSTRAINT fk_emp_company FOREIGN KEY (company_id) REFERENCES companies (id) ON DELETE CASCADE,
+  CONSTRAINT fk_emp_created FOREIGN KEY (created_by) REFERENCES users (id) ON DELETE SET NULL,
+  CONSTRAINT fk_emp_updated FOREIGN KEY (updated_by) REFERENCES users (id) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS carriers (
+  id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+  company_id BIGINT UNSIGNED NOT NULL,
+  legal_name VARCHAR(255) NOT NULL,
+  trade_name VARCHAR(255) NULL,
+  document VARCHAR(20) NULL,
+  state_registration VARCHAR(30) NULL,
+  email VARCHAR(255) NULL,
+  phone VARCHAR(30) NULL,
+  mobile VARCHAR(30) NULL,
+  cep VARCHAR(12) NULL,
+  street VARCHAR(255) NULL,
+  address_number VARCHAR(30) NULL,
+  complement VARCHAR(120) NULL,
+  district VARCHAR(120) NULL,
+  city VARCHAR(120) NULL,
+  state VARCHAR(2) NULL,
+  notes TEXT NULL,
+  status TINYINT UNSIGNED NOT NULL DEFAULT 1,
+  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  deleted_at DATETIME NULL,
+  created_by BIGINT UNSIGNED NULL,
+  updated_by BIGINT UNSIGNED NULL,
+  PRIMARY KEY (id),
+  KEY idx_car_company (company_id),
+  KEY idx_car_deleted (deleted_at),
+  CONSTRAINT fk_car_company FOREIGN KEY (company_id) REFERENCES companies (id) ON DELETE CASCADE,
+  CONSTRAINT fk_car_created FOREIGN KEY (created_by) REFERENCES users (id) ON DELETE SET NULL,
+  CONSTRAINT fk_car_updated FOREIGN KEY (updated_by) REFERENCES users (id) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS price_lists (
+  id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+  company_id BIGINT UNSIGNED NOT NULL,
+  name VARCHAR(120) NOT NULL,
+  is_default TINYINT UNSIGNED NOT NULL DEFAULT 0,
+  status TINYINT UNSIGNED NOT NULL DEFAULT 1,
+  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  deleted_at DATETIME NULL,
+  PRIMARY KEY (id),
+  KEY idx_pl_company (company_id),
+  CONSTRAINT fk_pl_company FOREIGN KEY (company_id) REFERENCES companies (id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS product_price_list_items (
+  id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+  price_list_id BIGINT UNSIGNED NOT NULL,
+  product_id BIGINT UNSIGNED NOT NULL,
+  price DECIMAL(14,4) NOT NULL DEFAULT 0.0000,
+  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (id),
+  UNIQUE KEY uq_ppli_list_product (price_list_id, product_id),
+  KEY idx_ppli_product (product_id),
+  CONSTRAINT fk_ppli_list FOREIGN KEY (price_list_id) REFERENCES price_lists (id) ON DELETE CASCADE,
+  CONSTRAINT fk_ppli_product FOREIGN KEY (product_id) REFERENCES products (id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS accounts_payable (
+  id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+  company_id BIGINT UNSIGNED NOT NULL,
+  supplier_id BIGINT UNSIGNED NULL,
+  description VARCHAR(500) NOT NULL,
+  amount DECIMAL(14,4) NOT NULL,
+  due_date DATE NOT NULL,
+  status VARCHAR(20) NOT NULL DEFAULT 'open' COMMENT 'open,paid,cancelled',
+  paid_amount DECIMAL(14,4) NOT NULL DEFAULT 0.0000,
+  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  deleted_at DATETIME NULL,
+  PRIMARY KEY (id),
+  KEY idx_ap_company (company_id),
+  KEY idx_ap_due (due_date),
+  KEY idx_ap_status (status),
+  CONSTRAINT fk_ap_company FOREIGN KEY (company_id) REFERENCES companies (id) ON DELETE CASCADE,
+  CONSTRAINT fk_ap_supplier FOREIGN KEY (supplier_id) REFERENCES suppliers (id) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS accounts_receivable (
+  id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+  company_id BIGINT UNSIGNED NOT NULL,
+  client_id BIGINT UNSIGNED NULL,
+  description VARCHAR(500) NOT NULL,
+  amount DECIMAL(14,4) NOT NULL,
+  due_date DATE NOT NULL,
+  status VARCHAR(20) NOT NULL DEFAULT 'open',
+  paid_amount DECIMAL(14,4) NOT NULL DEFAULT 0.0000,
+  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  deleted_at DATETIME NULL,
+  PRIMARY KEY (id),
+  KEY idx_ar_company (company_id),
+  KEY idx_ar_due (due_date),
+  CONSTRAINT fk_ar_company FOREIGN KEY (company_id) REFERENCES companies (id) ON DELETE CASCADE,
+  CONSTRAINT fk_ar_client FOREIGN KEY (client_id) REFERENCES clients (id) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS sales_documents (
+  id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+  company_id BIGINT UNSIGNED NOT NULL,
+  client_id BIGINT UNSIGNED NULL,
+  document_number VARCHAR(40) NULL,
+  total_amount DECIMAL(14,4) NOT NULL DEFAULT 0.0000,
+  status VARCHAR(32) NOT NULL DEFAULT 'finalized',
+  issued_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  deleted_at DATETIME NULL,
+  PRIMARY KEY (id),
+  KEY idx_sd_company_issued (company_id, issued_at),
+  CONSTRAINT fk_sd_company FOREIGN KEY (company_id) REFERENCES companies (id) ON DELETE CASCADE,
+  CONSTRAINT fk_sd_client FOREIGN KEY (client_id) REFERENCES clients (id) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS service_orders (
+  id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+  company_id BIGINT UNSIGNED NOT NULL,
+  client_id BIGINT UNSIGNED NULL,
+  code VARCHAR(40) NOT NULL,
+  status VARCHAR(32) NOT NULL DEFAULT 'open' COMMENT 'open,in_progress,done,cancelled',
+  priority VARCHAR(20) NOT NULL DEFAULT 'normal',
+  description TEXT NULL,
+  opened_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  deleted_at DATETIME NULL,
+  PRIMARY KEY (id),
+  UNIQUE KEY uq_so_company_code (company_id, code),
+  KEY idx_so_company_status (company_id, status),
+  CONSTRAINT fk_so_company FOREIGN KEY (company_id) REFERENCES companies (id) ON DELETE CASCADE,
+  CONSTRAINT fk_so_client FOREIGN KEY (client_id) REFERENCES clients (id) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS support_tickets (
+  id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+  company_id BIGINT UNSIGNED NOT NULL,
+  subject VARCHAR(255) NOT NULL,
+  status VARCHAR(32) NOT NULL DEFAULT 'open',
+  priority VARCHAR(20) NOT NULL DEFAULT 'normal',
+  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  deleted_at DATETIME NULL,
+  PRIMARY KEY (id),
+  KEY idx_st_company (company_id),
+  CONSTRAINT fk_st_company FOREIGN KEY (company_id) REFERENCES companies (id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS digital_certificates (
+  id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+  company_id BIGINT UNSIGNED NOT NULL,
+  label VARCHAR(120) NOT NULL,
+  expires_at DATE NULL,
+  file_path VARCHAR(500) NULL,
+  status VARCHAR(20) NOT NULL DEFAULT 'pending',
+  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (id),
+  KEY idx_dc_company (company_id),
+  CONSTRAINT fk_dc_company FOREIGN KEY (company_id) REFERENCES companies (id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS email_templates (
+  id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+  company_id BIGINT UNSIGNED NOT NULL,
+  slug VARCHAR(80) NOT NULL,
+  name VARCHAR(180) NOT NULL,
+  subject VARCHAR(255) NOT NULL,
+  body_html MEDIUMTEXT NOT NULL,
+  status TINYINT UNSIGNED NOT NULL DEFAULT 1,
+  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (id),
+  UNIQUE KEY uq_et_company_slug (company_id, slug),
+  CONSTRAINT fk_et_company FOREIGN KEY (company_id) REFERENCES companies (id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS email_notification_settings (
+  id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+  company_id BIGINT UNSIGNED NOT NULL,
+  event_key VARCHAR(80) NOT NULL,
+  enabled TINYINT UNSIGNED NOT NULL DEFAULT 1,
+  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (id),
+  UNIQUE KEY uq_ens_company_event (company_id, event_key),
+  CONSTRAINT fk_ens_company FOREIGN KEY (company_id) REFERENCES companies (id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

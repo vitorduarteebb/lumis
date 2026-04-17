@@ -193,4 +193,25 @@ final class ProductRepository extends BaseRepository
         );
         $stmt->execute(['id' => $id, 'cid' => $companyId]);
     }
+
+    /**
+     * @param list<int> $ids
+     * @return list<array<string, mixed>>
+     */
+    public function findByIdsForCompany(array $ids, int $companyId): array
+    {
+        $ids = array_values(array_filter(array_map('intval', $ids), static fn (int $v): bool => $v > 0));
+        if ($ids === []) {
+            return [];
+        }
+        $placeholders = implode(',', array_fill(0, count($ids), '?'));
+        $sql = "SELECT p.*, pc.name AS category_name FROM products p
+                LEFT JOIN product_categories pc ON pc.id = p.category_id
+                WHERE p.company_id = ? AND p.deleted_at IS NULL AND p.id IN ({$placeholders})
+                ORDER BY p.name ASC";
+        $stmt = $this->pdo()->prepare($sql);
+        $stmt->execute(array_merge([$companyId], $ids));
+
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
 }

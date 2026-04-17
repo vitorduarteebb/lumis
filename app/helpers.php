@@ -133,6 +133,23 @@ if (!function_exists('lumis_current_path')) {
     }
 }
 
+if (!function_exists('lumis_money_br')) {
+    function lumis_money_br(float $value): string
+    {
+        return 'R$ ' . number_format($value, 2, ',', '.');
+    }
+}
+
+if (!function_exists('lumis_slugify')) {
+    function lumis_slugify(string $text): string
+    {
+        $t = @iconv('UTF-8', 'ASCII//TRANSLIT', $text) ?: $text;
+        $t = strtolower((string) preg_replace('/[^a-zA-Z0-9]+/', '-', $t));
+
+        return trim($t, '-') ?: 'item';
+    }
+}
+
 if (!function_exists('lumis_nav_active')) {
     function lumis_nav_active(string $href, string $match = 'prefix'): bool
     {
