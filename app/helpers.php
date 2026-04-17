@@ -87,6 +87,24 @@ if (!function_exists('auth_id')) {
     }
 }
 
+if (!function_exists('current_company_id')) {
+    function current_company_id(): ?int
+    {
+        $v = $_SESSION['company_id'] ?? null;
+        if ($v === null || $v === '') {
+            return null;
+        }
+        return is_numeric($v) ? (int) $v : null;
+    }
+}
+
+if (!function_exists('lumis_list_per_page')) {
+    function lumis_list_per_page(): int
+    {
+        return 15;
+    }
+}
+
 if (!function_exists('can')) {
     function can(string $permission): bool
     {

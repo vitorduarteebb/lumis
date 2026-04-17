@@ -50,24 +50,57 @@ final class Router
             if ($route['method'] !== $request->method()) {
                 continue;
             }
-            if (!$this->matchPath($route['path'], $request->path())) {
+            $params = $this->matchPath($route['path'], $request->path());
+            if ($params === null) {
                 continue;
             }
 
-            return $this->runPipeline($request, $route['handler'], $route['middlewares']);
+            $req = $request->withRouteParams($params);
+
+            return $this->runPipeline($req, $route['handler'], $route['middlewares']);
         }
 
         throw new NotFoundException('Página não encontrada.');
     }
 
-    private function matchPath(string $routePath, string $requestPath): bool
+    /**
+     * @return array<string, string>|null
+     */
+    private function matchPath(string $routePath, string $requestPath): ?array
     {
         $r = rtrim($routePath, '/') ?: '/';
         $p = rtrim($requestPath, '/') ?: '/';
         if ($r === '/' && $p === '/') {
-            return true;
+            return [];
         }
-        return $r === $p;
+        if (!str_contains($routePath, '{')) {
+            return $r === $p ? [] : null;
+        }
+
+        $parts = $r === '/' ? [] : explode('/', trim($r, '/'));
+        $regexParts = [];
+        foreach ($parts as $part) {
+            if (preg_match('/^\{([a-zA-Z_][a-zA-Z0-9_]*)\}$/', $part, $m)) {
+                $regexParts[] = '(?P<' . $m[1] . '>[^/]+)';
+            } else {
+                $regexParts[] = preg_quote($part, '#');
+            }
+        }
+        $inner = $regexParts === [] ? '' : implode('/', $regexParts);
+        $pattern = '#^/' . $inner . '$#';
+
+        if (!preg_match($pattern, $p, $matches)) {
+            return null;
+        }
+
+        $params = [];
+        foreach ($matches as $k => $v) {
+            if (is_string($k) && $k !== '') {
+                $params[$k] = (string) $v;
+            }
+        }
+
+        return $params;
     }
 
     /**

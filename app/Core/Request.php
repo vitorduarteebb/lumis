@@ -10,13 +10,15 @@ final class Request
      * @param array<string, string> $query
      * @param array<string, mixed> $body
      * @param array<string, mixed> $server
+     * @param array<string, string> $routeParams valores de {id} etc.
      */
     public function __construct(
         private readonly string $method,
         private readonly string $path,
         private readonly array $query,
         private readonly array $body,
-        private readonly array $server
+        private readonly array $server,
+        private readonly array $routeParams = []
     ) {
     }
 
@@ -32,8 +34,38 @@ final class Request
             $path,
             $_GET,
             $_POST,
-            $_SERVER
+            $_SERVER,
+            []
         );
+    }
+
+    /**
+     * @param array<string, string> $params
+     */
+    public function withRouteParams(array $params): self
+    {
+        return new self(
+            $this->method,
+            $this->path,
+            $this->query,
+            $this->body,
+            $this->server,
+            $params
+        );
+    }
+
+    public function route(string $key, ?string $default = null): ?string
+    {
+        return $this->routeParams[$key] ?? $default;
+    }
+
+    public function routeInt(string $key): ?int
+    {
+        $v = $this->routeParams[$key] ?? null;
+        if ($v === null || !is_numeric($v)) {
+            return null;
+        }
+        return (int) $v;
     }
 
     public function method(): string

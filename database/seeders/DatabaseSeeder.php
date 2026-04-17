@@ -18,6 +18,7 @@ final class DatabaseSeeder
 
         $companyId = self::seedCompany($pdo);
         $storeId = self::seedStore($pdo, $companyId);
+        self::seedProductLookups($pdo, $companyId);
         $roleId = self::seedMasterRole($pdo);
         self::seedPermissions($pdo);
         self::seedRolePermissionsForMaster($pdo, $roleId);
@@ -53,6 +54,41 @@ SQL;
             'slug' => 'matriz',
         ]);
         return (int) $pdo->lastInsertId();
+    }
+
+    /**
+     * Categorias, marcas e unidades padrão (requer migration 002).
+     */
+    private static function seedProductLookups(PDO $pdo, int $companyId): void
+    {
+        $check = $pdo->query("SHOW TABLES LIKE 'product_categories'")->fetchColumn();
+        if (!$check) {
+            return;
+        }
+
+        $insCat = $pdo->prepare(
+            'INSERT IGNORE INTO product_categories (company_id, name, slug, status, created_at, updated_at)
+             VALUES (:cid, :name, :slug, 1, NOW(), NOW())'
+        );
+        foreach ([['Geral', 'geral'], ['Revenda', 'revenda'], ['Matéria-prima', 'materia-prima']] as $c) {
+            $insCat->execute(['cid' => $companyId, 'name' => $c[0], 'slug' => $c[1]]);
+        }
+
+        $insBrand = $pdo->prepare(
+            'INSERT IGNORE INTO product_brands (company_id, name, status, created_at, updated_at)
+             VALUES (:cid, :name, 1, NOW(), NOW())'
+        );
+        foreach (['Marca própria', 'Distribuidor'] as $bn) {
+            $insBrand->execute(['cid' => $companyId, 'name' => $bn]);
+        }
+
+        $insUnit = $pdo->prepare(
+            'INSERT IGNORE INTO product_units (company_id, name, abbreviation, status, created_at, updated_at)
+             VALUES (:cid, :name, :abbr, 1, NOW(), NOW())'
+        );
+        foreach ([['Unidade', 'UN'], ['Quilograma', 'KG'], ['Caixa', 'CX']] as $u) {
+            $insUnit->execute(['cid' => $companyId, 'name' => $u[0], 'abbr' => $u[1]]);
+        }
     }
 
     private static function seedMasterRole(PDO $pdo): int
@@ -98,18 +134,18 @@ SQL;
         }
 
         $crud = [
-            ['name' => 'Clientes — criar', 'slug' => 'clients.create', 'module' => 'cadastros', 'action' => 'create'],
-            ['name' => 'Clientes — editar', 'slug' => 'clients.edit', 'module' => 'cadastros', 'action' => 'edit'],
-            ['name' => 'Fornecedores — criar', 'slug' => 'suppliers.create', 'module' => 'cadastros', 'action' => 'create'],
-            ['name' => 'Fornecedores — editar', 'slug' => 'suppliers.edit', 'module' => 'cadastros', 'action' => 'edit'],
+            ['name' => 'Clientes — criar (legado)', 'slug' => 'clients.create', 'module' => 'cadastros', 'action' => 'create'],
+            ['name' => 'Clientes — editar (legado)', 'slug' => 'clients.edit', 'module' => 'cadastros', 'action' => 'edit'],
+            ['name' => 'Fornecedores — criar (legado)', 'slug' => 'suppliers.create', 'module' => 'cadastros', 'action' => 'create'],
+            ['name' => 'Fornecedores — editar (legado)', 'slug' => 'suppliers.edit', 'module' => 'cadastros', 'action' => 'edit'],
             ['name' => 'Funcionários — criar', 'slug' => 'employees.create', 'module' => 'cadastros', 'action' => 'create'],
             ['name' => 'Funcionários — editar', 'slug' => 'employees.edit', 'module' => 'cadastros', 'action' => 'edit'],
             ['name' => 'Transportadoras — criar', 'slug' => 'carriers.create', 'module' => 'cadastros', 'action' => 'create'],
             ['name' => 'Transportadoras — editar', 'slug' => 'carriers.edit', 'module' => 'cadastros', 'action' => 'edit'],
-            ['name' => 'Produtos — criar', 'slug' => 'products.create', 'module' => 'produtos', 'action' => 'create'],
-            ['name' => 'Produtos — editar', 'slug' => 'products.edit', 'module' => 'produtos', 'action' => 'edit'],
-            ['name' => 'Serviços — criar', 'slug' => 'services.create', 'module' => 'servicos', 'action' => 'create'],
-            ['name' => 'Serviços — editar', 'slug' => 'services.edit', 'module' => 'servicos', 'action' => 'edit'],
+            ['name' => 'Produtos — criar (legado)', 'slug' => 'products.create', 'module' => 'produtos', 'action' => 'create'],
+            ['name' => 'Produtos — editar (legado)', 'slug' => 'products.edit', 'module' => 'produtos', 'action' => 'edit'],
+            ['name' => 'Serviços — criar (legado)', 'slug' => 'services.create', 'module' => 'servicos', 'action' => 'create'],
+            ['name' => 'Serviços — editar (legado)', 'slug' => 'services.edit', 'module' => 'servicos', 'action' => 'edit'],
         ];
 
         return array_merge($fromConfig, $crud);

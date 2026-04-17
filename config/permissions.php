@@ -13,19 +13,33 @@ return [
     ['name' => 'Usuários — listar', 'slug' => 'users.view', 'module' => 'configuracoes', 'action' => 'view'],
     ['name' => 'Usuários — criar', 'slug' => 'users.create', 'module' => 'configuracoes', 'action' => 'create'],
     ['name' => 'Usuários — editar', 'slug' => 'users.edit', 'module' => 'configuracoes', 'action' => 'edit'],
+    ['name' => 'Configurações — Usuários excluir', 'slug' => 'configuracoes.usuarios.delete', 'module' => 'configuracoes', 'action' => 'delete'],
 
     ['name' => 'Cadastros — Clientes', 'slug' => 'cadastros.clientes.view', 'module' => 'cadastros', 'action' => 'view'],
+    ['name' => 'Cadastros — Clientes criar', 'slug' => 'cadastros.clientes.create', 'module' => 'cadastros', 'action' => 'create'],
+    ['name' => 'Cadastros — Clientes editar', 'slug' => 'cadastros.clientes.edit', 'module' => 'cadastros', 'action' => 'edit'],
+    ['name' => 'Cadastros — Clientes excluir', 'slug' => 'cadastros.clientes.delete', 'module' => 'cadastros', 'action' => 'delete'],
+
     ['name' => 'Cadastros — Fornecedores', 'slug' => 'cadastros.fornecedores.view', 'module' => 'cadastros', 'action' => 'view'],
+    ['name' => 'Cadastros — Fornecedores criar', 'slug' => 'cadastros.fornecedores.create', 'module' => 'cadastros', 'action' => 'create'],
+    ['name' => 'Cadastros — Fornecedores editar', 'slug' => 'cadastros.fornecedores.edit', 'module' => 'cadastros', 'action' => 'edit'],
+    ['name' => 'Cadastros — Fornecedores excluir', 'slug' => 'cadastros.fornecedores.delete', 'module' => 'cadastros', 'action' => 'delete'],
     ['name' => 'Cadastros — Funcionários', 'slug' => 'cadastros.funcionarios.view', 'module' => 'cadastros', 'action' => 'view'],
     ['name' => 'Cadastros — Transportadoras', 'slug' => 'cadastros.transportadoras.view', 'module' => 'cadastros', 'action' => 'view'],
     ['name' => 'Cadastros — Opções auxiliares', 'slug' => 'cadastros.opcoes_auxiliares.view', 'module' => 'cadastros', 'action' => 'view'],
 
     ['name' => 'Produtos — Gerenciar', 'slug' => 'produtos.gerenciar.view', 'module' => 'produtos', 'action' => 'view'],
+    ['name' => 'Produtos — Gerenciar criar', 'slug' => 'produtos.gerenciar.create', 'module' => 'produtos', 'action' => 'create'],
+    ['name' => 'Produtos — Gerenciar editar', 'slug' => 'produtos.gerenciar.edit', 'module' => 'produtos', 'action' => 'edit'],
+    ['name' => 'Produtos — Gerenciar excluir', 'slug' => 'produtos.gerenciar.delete', 'module' => 'produtos', 'action' => 'delete'],
     ['name' => 'Produtos — Valores de venda', 'slug' => 'produtos.valores_venda.view', 'module' => 'produtos', 'action' => 'view'],
     ['name' => 'Produtos — Etiquetas', 'slug' => 'produtos.etiquetas.view', 'module' => 'produtos', 'action' => 'view'],
     ['name' => 'Produtos — Opções auxiliares', 'slug' => 'produtos.opcoes_auxiliares.view', 'module' => 'produtos', 'action' => 'view'],
 
     ['name' => 'Serviços — Gerenciar', 'slug' => 'servicos.gerenciar.view', 'module' => 'servicos', 'action' => 'view'],
+    ['name' => 'Serviços — Gerenciar criar', 'slug' => 'servicos.gerenciar.create', 'module' => 'servicos', 'action' => 'create'],
+    ['name' => 'Serviços — Gerenciar editar', 'slug' => 'servicos.gerenciar.edit', 'module' => 'servicos', 'action' => 'edit'],
+    ['name' => 'Serviços — Gerenciar excluir', 'slug' => 'servicos.gerenciar.delete', 'module' => 'servicos', 'action' => 'delete'],
 
     ['name' => 'Orçamentos — Produtos', 'slug' => 'orcamentos.produtos.view', 'module' => 'orcamentos', 'action' => 'view'],
     ['name' => 'Orçamentos — Serviços', 'slug' => 'orcamentos.servicos.view', 'module' => 'orcamentos', 'action' => 'view'],

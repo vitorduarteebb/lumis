@@ -27,5 +27,6 @@ return static function (Router $router): void {
         new PermissionMiddleware('dashboard.view'),
     ]);
 
+    (require __DIR__ . '/crud_routes.php')($router);
     (require __DIR__ . '/module_routes.php')($router);
 };

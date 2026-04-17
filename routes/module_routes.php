@@ -11,9 +11,7 @@ use App\Controllers\FinanceiroController;
 use App\Controllers\NotasFiscaisController;
 use App\Controllers\OrcamentosController;
 use App\Controllers\OrdensServicoController;
-use App\Controllers\ProdutosController;
 use App\Controllers\RelatoriosController;
-use App\Controllers\ServicosController;
 use App\Controllers\VendasController;
 use App\Core\Router;
 use App\Middlewares\AuthMiddleware;
@@ -31,20 +29,11 @@ return static function (Router $router): void {
     ];
 
     /* Cadastros */
-    $router->get('/cadastros/clientes', [CadastrosController::class, 'clientes'], $m('cadastros.clientes.view', ['clients.view']));
-    $router->get('/cadastros/fornecedores', [CadastrosController::class, 'fornecedores'], $m('cadastros.fornecedores.view', ['suppliers.view']));
     $router->get('/cadastros/funcionarios', [CadastrosController::class, 'funcionarios'], $m('cadastros.funcionarios.view', ['employees.view']));
     $router->get('/cadastros/transportadoras', [CadastrosController::class, 'transportadoras'], $m('cadastros.transportadoras.view', ['carriers.view']));
     $router->get('/cadastros/opcoes-auxiliares', [CadastrosController::class, 'opcoesAuxiliares'], $m('cadastros.opcoes_auxiliares.view'));
 
-    /* Produtos */
-    $router->get('/produtos', [ProdutosController::class, 'index'], $m('produtos.gerenciar.view', ['products.view']));
-    $router->get('/produtos/valores-venda', [ProdutosController::class, 'valoresVenda'], $m('produtos.valores_venda.view'));
-    $router->get('/produtos/etiquetas', [ProdutosController::class, 'etiquetas'], $m('produtos.etiquetas.view'));
-    $router->get('/produtos/opcoes-auxiliares', [ProdutosController::class, 'opcoesAuxiliares'], $m('produtos.opcoes_auxiliares.view'));
-
-    /* Serviços */
-    $router->get('/servicos', [ServicosController::class, 'index'], $m('servicos.gerenciar.view', ['services.view']));
+    /* Produtos — rotas CRUD e submenus em crud_routes.php */
 
     /* Orçamentos */
     $router->get('/orcamentos/produtos', [OrcamentosController::class, 'produtos'], $m('orcamentos.produtos.view'));
@@ -111,7 +100,6 @@ return static function (Router $router): void {
     /* Configurações */
     $router->get('/configuracoes/gerais', [ConfiguracoesController::class, 'gerais'], $m('configuracoes.gerais.view', ['settings.view']));
     $router->get('/configuracoes/meu-plano', [ConfiguracoesController::class, 'meuPlano'], $m('configuracoes.meu_plano.view'));
-    $router->get('/configuracoes/usuarios', [ConfiguracoesController::class, 'usuarios'], $m('configuracoes.usuarios.view', ['users.view']));
     $router->get('/configuracoes/dados-empresa', [ConfiguracoesController::class, 'dadosEmpresa'], $m('configuracoes.dados_empresa.view', ['settings.company.view']));
     $router->get('/configuracoes/marca-empresa', [ConfiguracoesController::class, 'marcaEmpresa'], $m('configuracoes.marca_empresa.view'));
     $router->get('/configuracoes/empresas-lojas', [ConfiguracoesController::class, 'empresasLojas'], $m('configuracoes.empresas_lojas.view'));
