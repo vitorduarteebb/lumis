@@ -191,9 +191,13 @@ final class DashboardStatsRepository extends BaseRepository
 
     private function tableExists(string $table): bool
     {
-        $stmt = $this->pdo()->prepare('SHOW TABLES LIKE :t');
+        // SHOW TABLES não suporta prepared statements nativos no MySQL (erro 1295) — usar information_schema.
+        $stmt = $this->pdo()->prepare(
+            'SELECT COUNT(*) FROM information_schema.tables
+             WHERE table_schema = DATABASE() AND table_name = :t'
+        );
         $stmt->execute(['t' => $table]);
 
-        return $stmt->fetchColumn() !== false;
+        return (int) $stmt->fetchColumn() > 0;
     }
 }
