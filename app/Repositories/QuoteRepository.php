@@ -30,16 +30,23 @@ final class QuoteRepository extends BaseRepository
             $params['st'] = $status;
         }
         if ($search !== '') {
-            $where[] = '(q.quote_number LIKE :q OR c.name LIKE :q2)';
-            $params['q'] = '%' . $search . '%';
+            $w = 'c.name LIKE :q2';
             $params['q2'] = '%' . $search . '%';
+            if ($this->columnExists('quotes', 'quote_number')) {
+                $w = '(q.quote_number LIKE :q OR ' . $w . ')';
+                $params['q'] = '%' . $search . '%';
+            }
+            $where[] = $w;
         }
+        $dateExpr = $this->columnExists('quotes', 'issued_at')
+            ? 'COALESCE(q.issued_at, DATE(q.created_at))'
+            : 'DATE(q.created_at)';
         if ($dateFrom !== null && $dateFrom !== '') {
-            $where[] = 'COALESCE(q.issued_at, DATE(q.created_at)) >= :df';
+            $where[] = "{$dateExpr} >= :df";
             $params['df'] = $dateFrom;
         }
         if ($dateTo !== null && $dateTo !== '') {
-            $where[] = 'COALESCE(q.issued_at, DATE(q.created_at)) <= :dt';
+            $where[] = "{$dateExpr} <= :dt";
             $params['dt'] = $dateTo;
         }
         $whereSql = implode(' AND ', $where);

@@ -30,7 +30,8 @@ final class ServiceOrderRepository extends BaseRepository
             $where[] = 'so.status = :st';
             $params['st'] = $status;
         }
-        if ($assignedUserId !== null && $assignedUserId > 0) {
+        $hasAssign = $this->columnExists('service_orders', 'assigned_user_id');
+        if ($hasAssign && $assignedUserId !== null && $assignedUserId > 0) {
             $where[] = 'so.assigned_user_id = :au';
             $params['au'] = $assignedUserId;
         }
@@ -53,6 +54,8 @@ final class ServiceOrderRepository extends BaseRepository
             $params['dt'] = $dateTo;
         }
         $whereSql = implode(' AND ', $where);
+        $userJoin = $hasAssign ? 'LEFT JOIN users u ON u.id = so.assigned_user_id' : '';
+        $techField = $hasAssign ? 'u.name AS technician_name' : 'NULL AS technician_name';
         $stmt = $this->pdo()->prepare(
             "SELECT COUNT(*) FROM service_orders so
              LEFT JOIN clients c ON c.id = so.client_id
@@ -61,10 +64,10 @@ final class ServiceOrderRepository extends BaseRepository
         $stmt->execute($params);
         $total = (int) $stmt->fetchColumn();
 
-        $sql = "SELECT so.*, c.name AS client_name, u.name AS technician_name
+        $sql = "SELECT so.*, c.name AS client_name, {$techField}
                 FROM service_orders so
                 LEFT JOIN clients c ON c.id = so.client_id
-                LEFT JOIN users u ON u.id = so.assigned_user_id
+                {$userJoin}
                 WHERE {$whereSql}
                 ORDER BY so.opened_at DESC, so.id DESC
                 LIMIT " . (int) $perPage . ' OFFSET ' . (int) $offset;
@@ -79,12 +82,15 @@ final class ServiceOrderRepository extends BaseRepository
      */
     public function findByIdForCompany(int $id, int $companyId): ?array
     {
+        $hasAssign = $this->columnExists('service_orders', 'assigned_user_id');
+        $userJoin = $hasAssign ? 'LEFT JOIN users u ON u.id = so.assigned_user_id' : '';
+        $techField = $hasAssign ? 'u.name AS technician_name' : 'NULL AS technician_name';
         $stmt = $this->pdo()->prepare(
-            'SELECT so.*, c.name AS client_name, c.email AS client_email, u.name AS technician_name
+            "SELECT so.*, c.name AS client_name, c.email AS client_email, {$techField}
              FROM service_orders so
              LEFT JOIN clients c ON c.id = so.client_id
-             LEFT JOIN users u ON u.id = so.assigned_user_id
-             WHERE so.id = :id AND so.company_id = :cid AND so.deleted_at IS NULL LIMIT 1'
+             {$userJoin}
+             WHERE so.id = :id AND so.company_id = :cid AND so.deleted_at IS NULL LIMIT 1"
         );
         $stmt->execute(['id' => $id, 'cid' => $companyId]);
         $row = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -249,6 +255,9 @@ final class ServiceOrderRepository extends BaseRepository
      */
     public function overdue(int $companyId, int $limit): array
     {
+        if (!$this->columnExists('service_orders', 'expected_at')) {
+            return [];
+        }
         $limit = max(1, min(30, $limit));
         $stmt = $this->pdo()->prepare(
             "SELECT so.*, c.name AS client_name

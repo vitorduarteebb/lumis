@@ -162,6 +162,9 @@ final class DashboardStatsRepository extends BaseRepository
      */
     public function recentAuditLogs(int $limit): array
     {
+        if (!$this->tableExists('audit_logs')) {
+            return [];
+        }
         $stmt = $this->pdo()->prepare(
             'SELECT id, action, module, description, created_at FROM audit_logs
              ORDER BY created_at DESC LIMIT ' . (int) max(1, $limit)

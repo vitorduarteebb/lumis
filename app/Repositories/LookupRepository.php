@@ -63,19 +63,34 @@ final class LookupRepository extends BaseRepository
      */
     public function insert(int $companyId, array $data): int
     {
-        $stmt = $this->pdo()->prepare(
-            'INSERT INTO lookup_entries (company_id, entry_type, name, slug, value_text, sort_order, status, created_at, updated_at)
-             VALUES (:company_id, :entry_type, :name, :slug, :value_text, :sort_order, :status, NOW(), NOW())'
-        );
-        $stmt->execute([
-            'company_id' => $companyId,
-            'entry_type' => $data['entry_type'],
-            'name' => $data['name'],
-            'slug' => $data['slug'],
-            'value_text' => $data['value_text'] ?? null,
-            'sort_order' => $data['sort_order'],
-            'status' => $data['status'],
-        ]);
+        if ($this->columnExists('lookup_entries', 'value_text')) {
+            $stmt = $this->pdo()->prepare(
+                'INSERT INTO lookup_entries (company_id, entry_type, name, slug, value_text, sort_order, status, created_at, updated_at)
+                 VALUES (:company_id, :entry_type, :name, :slug, :value_text, :sort_order, :status, NOW(), NOW())'
+            );
+            $stmt->execute([
+                'company_id' => $companyId,
+                'entry_type' => $data['entry_type'],
+                'name' => $data['name'],
+                'slug' => $data['slug'],
+                'value_text' => $data['value_text'] ?? null,
+                'sort_order' => $data['sort_order'],
+                'status' => $data['status'],
+            ]);
+        } else {
+            $stmt = $this->pdo()->prepare(
+                'INSERT INTO lookup_entries (company_id, entry_type, name, slug, sort_order, status, created_at, updated_at)
+                 VALUES (:company_id, :entry_type, :name, :slug, :sort_order, :status, NOW(), NOW())'
+            );
+            $stmt->execute([
+                'company_id' => $companyId,
+                'entry_type' => $data['entry_type'],
+                'name' => $data['name'],
+                'slug' => $data['slug'],
+                'sort_order' => $data['sort_order'],
+                'status' => $data['status'],
+            ]);
+        }
 
         return (int) $this->pdo()->lastInsertId();
     }
@@ -85,22 +100,31 @@ final class LookupRepository extends BaseRepository
      */
     public function update(int $id, int $companyId, array $data): void
     {
-        $hasVt = array_key_exists('value_text', $data);
-        $sql = $hasVt
-            ? 'UPDATE lookup_entries SET name = :name, slug = :slug, value_text = :value_text, sort_order = :sort_order, status = :status, updated_at = NOW()
-                   WHERE id = :id AND company_id = :cid AND deleted_at IS NULL'
-            : 'UPDATE lookup_entries SET name = :name, slug = :slug, sort_order = :sort_order, status = :status, updated_at = NOW()
-                   WHERE id = :id AND company_id = :cid AND deleted_at IS NULL';
-        $params = [
-            'id' => $id,
-            'cid' => $companyId,
-            'name' => $data['name'],
-            'slug' => $data['slug'],
-            'sort_order' => $data['sort_order'],
-            'status' => $data['status'],
-        ];
-        if ($hasVt) {
-            $params['value_text'] = $data['value_text'];
+        $hasVtKey = array_key_exists('value_text', $data);
+        $hasVtCol = $this->columnExists('lookup_entries', 'value_text');
+        if ($hasVtKey && $hasVtCol) {
+            $sql = 'UPDATE lookup_entries SET name = :name, slug = :slug, value_text = :value_text, sort_order = :sort_order, status = :status, updated_at = NOW()
+                    WHERE id = :id AND company_id = :cid AND deleted_at IS NULL';
+            $params = [
+                'id' => $id,
+                'cid' => $companyId,
+                'name' => $data['name'],
+                'slug' => $data['slug'],
+                'value_text' => $data['value_text'],
+                'sort_order' => $data['sort_order'],
+                'status' => $data['status'],
+            ];
+        } else {
+            $sql = 'UPDATE lookup_entries SET name = :name, slug = :slug, sort_order = :sort_order, status = :status, updated_at = NOW()
+                    WHERE id = :id AND company_id = :cid AND deleted_at IS NULL';
+            $params = [
+                'id' => $id,
+                'cid' => $companyId,
+                'name' => $data['name'],
+                'slug' => $data['slug'],
+                'sort_order' => $data['sort_order'],
+                'status' => $data['status'],
+            ];
         }
         $stmt = $this->pdo()->prepare($sql);
         $stmt->execute($params);
