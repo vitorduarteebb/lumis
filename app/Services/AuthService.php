@@ -25,6 +25,7 @@ final class AuthService
     public function login(string $email, string $password, Request $request): ?string
     {
         $email = trim($email);
+        $email = preg_replace('/[\x00-\x1F\x7F]/u', '', $email) ?? $email;
         $email = function_exists('mb_strtolower') ? mb_strtolower($email, 'UTF-8') : strtolower($email);
         $ip = (string) ($request->server('REMOTE_ADDR') ?? '');
         $ua = (string) ($request->server('HTTP_USER_AGENT') ?? '');

@@ -13,7 +13,7 @@ final class UserRepository extends BaseRepository
      */
     public function findByEmail(string $email): ?array
     {
-        $sql = 'SELECT * FROM users WHERE LOWER(email) = LOWER(:email) AND deleted_at IS NULL LIMIT 1';
+        $sql = 'SELECT * FROM users WHERE LOWER(TRIM(email)) = LOWER(TRIM(:email)) AND deleted_at IS NULL LIMIT 1';
         $stmt = $this->pdo()->prepare($sql);
         $stmt->execute(['email' => $email]);
         $row = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -70,7 +70,7 @@ final class UserRepository extends BaseRepository
 
     public function emailExists(string $email, ?int $exceptUserId = null): bool
     {
-        $sql = 'SELECT COUNT(*) FROM users WHERE LOWER(email) = LOWER(:email) AND deleted_at IS NULL';
+        $sql = 'SELECT COUNT(*) FROM users WHERE LOWER(TRIM(email)) = LOWER(TRIM(:email)) AND deleted_at IS NULL';
         $params = ['email' => $email];
         if ($exceptUserId !== null) {
             $sql .= ' AND id != :eid';
