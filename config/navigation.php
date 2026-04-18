@@ -77,6 +77,17 @@ return [
         ],
     ],
     [
+        'key' => 'locacoes_ops',
+        'label' => 'Locações',
+        'icon' => 'bi-truck',
+        'children' => [
+            ['label' => 'Gerenciar locações', 'href' => '/locacoes/gerenciar'],
+            ['label' => 'Distribuição de entregas', 'href' => '/locacoes/distribuicao'],
+            ['label' => 'Painel do entregador', 'href' => '/locacoes/painel-entregador'],
+            ['label' => 'Opções auxiliares', 'href' => '/locacoes/opcoes-auxiliares'],
+        ],
+    ],
+    [
         'key' => 'estoque',
         'label' => 'Estoque',
         'icon' => 'bi-archive',

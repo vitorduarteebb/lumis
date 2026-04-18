@@ -99,6 +99,7 @@ final class UsersController extends Controller
         $storeIdRaw = $request->input('store_id', '');
         $storeId = $storeIdRaw === '' || $storeIdRaw === null ? null : (int) $storeIdRaw;
         $roleIds = self::roleIdsFromBody($request);
+        $isDeliveryDriver = (int) $request->input('is_delivery_driver', 0) === 1 ? 1 : 0;
 
         $errors = [];
         if ($name === '') {
@@ -143,6 +144,7 @@ final class UsersController extends Controller
                     'company_id' => $companyId,
                     'store_id' => $storeId,
                     'role_ids' => $roleIds,
+                    'is_delivery_driver' => $isDeliveryDriver,
                 ],
             ]);
         }
@@ -154,6 +156,7 @@ final class UsersController extends Controller
             'company_id' => $companyId,
             'store_id' => $storeId,
             'status' => $status,
+            'is_delivery_driver' => $isDeliveryDriver,
         ]);
         $users->syncRoles($uid, $roleIds);
 
@@ -269,6 +272,7 @@ final class UsersController extends Controller
         $storeIdRaw = $request->input('store_id', '');
         $storeId = $storeIdRaw === '' || $storeIdRaw === null ? null : (int) $storeIdRaw;
         $roleIds = self::roleIdsFromBody($request);
+        $isDeliveryDriver = (int) $request->input('is_delivery_driver', 0) === 1 ? 1 : 0;
 
         $errors = [];
         if ($name === '') {
@@ -305,6 +309,7 @@ final class UsersController extends Controller
                     'status' => $status,
                     'company_id' => $companyId,
                     'store_id' => $storeId,
+                    'is_delivery_driver' => $isDeliveryDriver,
                 ]),
                 'roles' => $roles,
                 'stores' => $stores,
@@ -321,6 +326,7 @@ final class UsersController extends Controller
             'status' => $status,
             'company_id' => $companyId,
             'store_id' => $storeId,
+            'is_delivery_driver' => $isDeliveryDriver,
         ];
         if ($password !== '') {
             $data['password_hash'] = password_hash($password, PASSWORD_DEFAULT);

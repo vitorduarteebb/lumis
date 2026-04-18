@@ -13,6 +13,10 @@ final class DashboardController extends Controller
 {
     public function index(Request $request): string
     {
+        if (function_exists('lumis_is_delivery_only_session') && lumis_is_delivery_only_session()) {
+            redirect('/locacoes/painel-entregador');
+        }
+
         $name = (string) Session::get('user_name', 'Usuário');
         $cid = current_company_id();
         if ($cid === null) {

@@ -23,6 +23,10 @@ use App\Controllers\ProdutosController;
 use App\Controllers\ServicosController;
 use App\Controllers\SuppliersController;
 use App\Controllers\UsersController;
+use App\Controllers\LocacoesController;
+use App\Controllers\LocacoesDistribuicaoController;
+use App\Controllers\LocacoesEntregadorController;
+use App\Controllers\LocacoesLookupController;
 use App\Controllers\VendasController;
 use App\Controllers\VendasLookupController;
 use App\Core\Router;
@@ -226,6 +230,28 @@ return static function (Router $router): void {
     $router->post('/vendas/opcoes-auxiliares/{id}/excluir', [VendasLookupController::class, 'destroy'], $m('vendas.opcoes_auxiliares.delete', ['vendas.opcoes_auxiliares.view']));
     $router->post('/vendas/opcoes-auxiliares/{id}', [VendasLookupController::class, 'update'], $m('vendas.opcoes_auxiliares.edit', ['vendas.opcoes_auxiliares.view']));
     $router->get('/vendas/opcoes-auxiliares', [VendasLookupController::class, 'index'], $m('vendas.opcoes_auxiliares.view'));
+
+    /* ========== Locações (operacional / logística) — estáticos antes de /{id} ========== */
+    $router->get('/locacoes/painel-entregador/poll', [LocacoesEntregadorController::class, 'poll'], $m('locacoes.entregador.painel'));
+    $router->post('/locacoes/painel-entregador/{id}/status', [LocacoesEntregadorController::class, 'atualizarStatus'], $m('locacoes.entregador.update_status'));
+    $router->post('/locacoes/distribuicao/atribuir', [LocacoesDistribuicaoController::class, 'atribuir'], $m('locacoes.assign'));
+    $router->post('/locacoes/gerenciar/{id}/cancelar', [LocacoesController::class, 'cancelar'], $m('locacoes.gerenciar.edit'));
+    $router->post('/locacoes/gerenciar/{id}/excluir', [LocacoesController::class, 'destroy'], $m('locacoes.gerenciar.delete'));
+    $router->get('/locacoes/gerenciar/novo', [LocacoesController::class, 'create'], $m('locacoes.gerenciar.create'));
+    $router->post('/locacoes/gerenciar', [LocacoesController::class, 'store'], $m('locacoes.gerenciar.create'));
+    $router->get('/locacoes/gerenciar/{id}/editar', [LocacoesController::class, 'edit'], $m('locacoes.gerenciar.edit'));
+    $router->post('/locacoes/gerenciar/{id}', [LocacoesController::class, 'update'], $m('locacoes.gerenciar.edit'));
+    $router->get('/locacoes/gerenciar/{id}', [LocacoesController::class, 'show'], $m('locacoes.gerenciar.view'));
+    $router->get('/locacoes/gerenciar', [LocacoesController::class, 'index'], $m('locacoes.gerenciar.view'));
+    $router->get('/locacoes/distribuicao', [LocacoesDistribuicaoController::class, 'index'], $m('locacoes.distribuicao.view'));
+    $router->get('/locacoes/painel-entregador/{id}', [LocacoesEntregadorController::class, 'show'], $m('locacoes.entregador.painel'));
+    $router->get('/locacoes/painel-entregador', [LocacoesEntregadorController::class, 'index'], $m('locacoes.entregador.painel'));
+    $router->get('/locacoes/opcoes-auxiliares/novo', [LocacoesLookupController::class, 'create'], $m('locacoes.opcoes_auxiliares.create'));
+    $router->post('/locacoes/opcoes-auxiliares', [LocacoesLookupController::class, 'store'], $m('locacoes.opcoes_auxiliares.create'));
+    $router->get('/locacoes/opcoes-auxiliares/{id}/editar', [LocacoesLookupController::class, 'edit'], $m('locacoes.opcoes_auxiliares.edit'));
+    $router->post('/locacoes/opcoes-auxiliares/{id}/excluir', [LocacoesLookupController::class, 'destroy'], $m('locacoes.opcoes_auxiliares.delete'));
+    $router->post('/locacoes/opcoes-auxiliares/{id}', [LocacoesLookupController::class, 'update'], $m('locacoes.opcoes_auxiliares.edit'));
+    $router->get('/locacoes/opcoes-auxiliares', [LocacoesLookupController::class, 'index'], $m('locacoes.opcoes_auxiliares.view'));
 
     /* ========== Estoque ========== */
     $router->get('/estoque/movimentacoes/{id}', [EstoqueController::class, 'movimentacaoShow'], $m('estoque.movimentacoes.view'));

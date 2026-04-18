@@ -113,6 +113,22 @@ if (is_array($selRoles)) {
     </div>
 
     <div class="lumis-form-section">
+        <div class="lumis-form-section__title">Operação</div>
+        <div class="form-check">
+            <?php
+            $idd = 0;
+            if (array_key_exists('is_delivery_driver', $old)) {
+                $idd = (int) $old['is_delivery_driver'];
+            } elseif ($isEdit && $user !== null && isset($user['is_delivery_driver'])) {
+                $idd = (int) $user['is_delivery_driver'];
+            }
+            ?>
+            <input class="form-check-input" type="checkbox" name="is_delivery_driver" value="1" id="is_delivery_driver" <?= $idd === 1 ? 'checked' : '' ?>>
+            <label class="form-check-label small" for="is_delivery_driver">Atuar como entregador (locações / logística)</label>
+        </div>
+    </div>
+
+    <div class="lumis-form-section">
         <div class="lumis-form-section__title">Papéis</div>
         <div class="row g-2">
             <?php foreach ($roles as $r): ?>

@@ -63,6 +63,9 @@ final class AuthController extends Controller
         }
 
         Session::flash('success', 'Bem-vindo ao Lumis ERP.');
+        if (function_exists('lumis_is_delivery_only_session') && lumis_is_delivery_only_session()) {
+            Response::redirect('/locacoes/painel-entregador');
+        }
         Response::redirect('/dashboard');
     }
 

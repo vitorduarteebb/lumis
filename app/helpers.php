@@ -122,6 +122,56 @@ if (!function_exists('can')) {
     }
 }
 
+if (!function_exists('lumis_is_delivery_only_session')) {
+    /**
+     * Usuário com perfil de entregador (sem acesso administrativo às locações).
+     */
+    function lumis_is_delivery_only_session(): bool
+    {
+        $roles = $_SESSION['role_slugs'] ?? [];
+        if (is_array($roles) && in_array('master', $roles, true)) {
+            return false;
+        }
+        $perms = $_SESSION['permissions'] ?? [];
+        if (!is_array($perms)) {
+            return false;
+        }
+        $hasPanel = in_array('locacoes.entregador.painel', $perms, true);
+        $hasAdmin = in_array('locacoes.gerenciar.view', $perms, true);
+
+        return $hasPanel && !$hasAdmin;
+    }
+}
+
+if (!function_exists('lumis_google_maps_url')) {
+    /**
+     * Link para abrir no Google Maps (navegação ou busca por endereço).
+     *
+     * @param array<string, mixed> $addressParts street, address_number, complement, district, city, state, cep
+     */
+    function lumis_google_maps_url(array $addressParts, ?float $lat = null, ?float $lng = null): string
+    {
+        if ($lat !== null && $lng !== null && abs($lat) <= 90 && abs($lng) <= 180) {
+            return 'https://www.google.com/maps/dir/?api=1&destination=' . rawurlencode((string) $lat . ',' . (string) $lng);
+        }
+        $parts = array_filter([
+            trim((string) ($addressParts['street'] ?? '')),
+            trim((string) ($addressParts['address_number'] ?? '')),
+            trim((string) ($addressParts['complement'] ?? '')),
+            trim((string) ($addressParts['district'] ?? '')),
+            trim((string) ($addressParts['city'] ?? '')),
+            trim((string) ($addressParts['state'] ?? '')),
+            trim((string) ($addressParts['cep'] ?? '')),
+        ], static fn ($v) => $v !== '');
+        $q = implode(', ', $parts);
+        if ($q === '') {
+            return '#';
+        }
+
+        return 'https://www.google.com/maps/search/?api=1&query=' . rawurlencode($q);
+    }
+}
+
 if (!function_exists('lumis_current_path')) {
     function lumis_current_path(): string
     {

@@ -156,17 +156,34 @@ final class UserRepository extends BaseRepository
      */
     public function insert(array $data): int
     {
-        $sql = 'INSERT INTO users (company_id, store_id, name, email, password, status, created_at, updated_at)
-                VALUES (:company_id, :store_id, :name, :email, :password, :status, NOW(), NOW())';
-        $stmt = $this->pdo()->prepare($sql);
-        $stmt->execute([
-            'company_id' => $data['company_id'],
-            'store_id' => $data['store_id'],
-            'name' => $data['name'],
-            'email' => $data['email'],
-            'password' => $data['password_hash'],
-            'status' => $data['status'],
-        ]);
+        $driver = isset($data['is_delivery_driver']) ? ((int) $data['is_delivery_driver'] === 1 ? 1 : 0) : 0;
+        if ($this->columnExists('users', 'is_delivery_driver')) {
+            $sql = 'INSERT INTO users (company_id, store_id, name, email, password, status, is_delivery_driver, created_at, updated_at)
+                    VALUES (:company_id, :store_id, :name, :email, :password, :status, :is_delivery_driver, NOW(), NOW())';
+            $stmt = $this->pdo()->prepare($sql);
+            $stmt->execute([
+                'company_id' => $data['company_id'],
+                'store_id' => $data['store_id'],
+                'name' => $data['name'],
+                'email' => $data['email'],
+                'password' => $data['password_hash'],
+                'status' => $data['status'],
+                'is_delivery_driver' => $driver,
+            ]);
+        } else {
+            $sql = 'INSERT INTO users (company_id, store_id, name, email, password, status, created_at, updated_at)
+                    VALUES (:company_id, :store_id, :name, :email, :password, :status, NOW(), NOW())';
+            $stmt = $this->pdo()->prepare($sql);
+            $stmt->execute([
+                'company_id' => $data['company_id'],
+                'store_id' => $data['store_id'],
+                'name' => $data['name'],
+                'email' => $data['email'],
+                'password' => $data['password_hash'],
+                'status' => $data['status'],
+            ]);
+        }
+
         return (int) $this->pdo()->lastInsertId();
     }
 
@@ -200,6 +217,10 @@ final class UserRepository extends BaseRepository
         if (array_key_exists('status', $data)) {
             $sets[] = 'status = :status';
             $params['status'] = $data['status'];
+        }
+        if (array_key_exists('is_delivery_driver', $data) && $this->columnExists('users', 'is_delivery_driver')) {
+            $sets[] = 'is_delivery_driver = :is_delivery_driver';
+            $params['is_delivery_driver'] = (int) $data['is_delivery_driver'] === 1 ? 1 : 0;
         }
         $sql = 'UPDATE users SET ' . implode(', ', $sets) . ' WHERE id = :id AND deleted_at IS NULL';
         $stmt = $this->pdo()->prepare($sql);
@@ -237,6 +258,27 @@ final class UserRepository extends BaseRepository
         $stmt = $this->pdo()->prepare(
             'SELECT id, name, email FROM users WHERE company_id = :cid AND deleted_at IS NULL AND status = 1 ORDER BY name ASC'
         );
+        $stmt->execute(['cid' => $companyId]);
+
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    /**
+     * Entregadores marcados para locações (logística).
+     *
+     * @return list<array<string, mixed>>
+     */
+    public function listDeliveryDriversForCompany(int $companyId): array
+    {
+        if ($this->columnExists('users', 'is_delivery_driver')) {
+            $stmt = $this->pdo()->prepare(
+                'SELECT id, name, email FROM users WHERE company_id = :cid AND deleted_at IS NULL AND status = 1 AND is_delivery_driver = 1 ORDER BY name ASC'
+            );
+        } else {
+            $stmt = $this->pdo()->prepare(
+                'SELECT id, name, email FROM users WHERE company_id = :cid AND deleted_at IS NULL AND status = 1 ORDER BY name ASC'
+            );
+        }
         $stmt->execute(['cid' => $companyId]);
 
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
