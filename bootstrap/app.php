@@ -35,7 +35,11 @@ if (session_status() !== PHP_SESSION_ACTIVE) {
     session_start();
 }
 
-$logPath = $basePath . '/storage/logs/app.log';
+$logDir = $basePath . '/storage/logs';
+if (!is_dir($logDir)) {
+    mkdir($logDir, 0775, true);
+}
+$logPath = $logDir . '/app.log';
 $logger = new Logger('lumis');
 $logger->pushHandler(new RotatingFileHandler($logPath, 14, Level::Debug));
 
