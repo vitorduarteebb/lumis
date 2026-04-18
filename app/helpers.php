@@ -150,6 +150,39 @@ if (!function_exists('lumis_slugify')) {
     }
 }
 
+if (!function_exists('lumis_encrypt_secret')) {
+    /**
+     * Cifra texto sensível (ex.: senha de certificado) com AES-256-CBC usando APP_KEY.
+     */
+    function lumis_encrypt_secret(string $plain): string
+    {
+        $key = hash('sha256', (string) ($_ENV['APP_KEY'] ?? 'lumis'), true);
+        $iv = random_bytes(16);
+        $raw = openssl_encrypt($plain, 'aes-256-cbc', $key, OPENSSL_RAW_DATA, $iv);
+        if ($raw === false) {
+            return '';
+        }
+
+        return base64_encode($iv . $raw);
+    }
+}
+
+if (!function_exists('lumis_decrypt_secret')) {
+    function lumis_decrypt_secret(string $encoded): string
+    {
+        $bin = base64_decode($encoded, true);
+        if ($bin === false || strlen($bin) < 17) {
+            return '';
+        }
+        $iv = substr($bin, 0, 16);
+        $ct = substr($bin, 16);
+        $key = hash('sha256', (string) ($_ENV['APP_KEY'] ?? 'lumis'), true);
+        $plain = openssl_decrypt($ct, 'aes-256-cbc', $key, OPENSSL_RAW_DATA, $iv);
+
+        return $plain === false ? '' : $plain;
+    }
+}
+
 if (!function_exists('lumis_nav_active')) {
     function lumis_nav_active(string $href, string $match = 'prefix'): bool
     {

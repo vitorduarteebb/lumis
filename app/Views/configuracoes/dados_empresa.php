@@ -22,6 +22,10 @@ $p = is_array($profile ?? null) ? $profile : [];
                 <label class="form-label lumis-label" for="legal_name">Razão social</label>
                 <input type="text" class="form-control app-input" id="legal_name" name="legal_name" value="<?= htmlspecialchars((string) ($p['legal_name'] ?? ''), ENT_QUOTES, 'UTF-8') ?>">
             </div>
+            <div class="col-md-6">
+                <label class="form-label lumis-label" for="trade_name">Nome fantasia</label>
+                <input type="text" class="form-control app-input" id="trade_name" name="trade_name" value="<?= htmlspecialchars((string) ($p['trade_name'] ?? ''), ENT_QUOTES, 'UTF-8') ?>">
+            </div>
             <div class="col-md-3">
                 <label class="form-label lumis-label" for="document_cnpj">CNPJ</label>
                 <input type="text" class="form-control app-input" id="document_cnpj" name="document_cnpj" value="<?= htmlspecialchars((string) ($p['document_cnpj'] ?? ''), ENT_QUOTES, 'UTF-8') ?>">
@@ -50,6 +54,10 @@ $p = is_array($profile ?? null) ? $profile : [];
             <div class="col-md-4">
                 <label class="form-label lumis-label" for="mobile">Celular</label>
                 <input type="text" class="form-control app-input" id="mobile" name="mobile" value="<?= htmlspecialchars((string) ($p['mobile'] ?? ''), ENT_QUOTES, 'UTF-8') ?>">
+            </div>
+            <div class="col-md-6">
+                <label class="form-label lumis-label" for="website">Site</label>
+                <input type="url" class="form-control app-input" id="website" name="website" value="<?= htmlspecialchars((string) ($p['website'] ?? ''), ENT_QUOTES, 'UTF-8') ?>" placeholder="https://">
             </div>
         </div>
     </div>

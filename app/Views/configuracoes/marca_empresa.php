@@ -4,6 +4,7 @@ declare(strict_types=1);
 /** @var array<string, mixed> $profile */
 $p = is_array($profile ?? null) ? $profile : [];
 $logo = (string) ($p['logo_path'] ?? '');
+$fav = (string) ($p['favicon_path'] ?? '');
 ?>
 
 <div class="lumis-page-head">
@@ -20,14 +21,32 @@ $logo = (string) ($p['logo_path'] ?? '');
         <img src="<?= htmlspecialchars($logo, ENT_QUOTES, 'UTF-8') ?>" alt="Logo" style="max-height: 64px;">
     </div>
 <?php endif; ?>
+<?php if ($fav !== ''): ?>
+    <div class="mb-3 p-3 rounded-3 border border-secondary-subtle d-inline-block ms-2">
+        <div class="text-secondary small mb-1">Favicon</div>
+        <img src="<?= htmlspecialchars($fav, ENT_QUOTES, 'UTF-8') ?>" alt="" width="32" height="32">
+    </div>
+<?php endif; ?>
 
 <form class="lumis-form" method="post" action="/configuracoes/marca-empresa" enctype="multipart/form-data">
     <?= \App\Helpers\Csrf::field() ?>
     <div class="lumis-form-section">
         <div class="row g-3">
             <div class="col-md-6">
+                <label class="form-label lumis-label" for="display_name">Nome exibido na marca</label>
+                <input type="text" class="form-control app-input" id="display_name" name="display_name" value="<?= htmlspecialchars((string) ($p['display_name'] ?? ''), ENT_QUOTES, 'UTF-8') ?>">
+            </div>
+        </div>
+    </div>
+    <div class="lumis-form-section">
+        <div class="row g-3">
+            <div class="col-md-6">
                 <label class="form-label lumis-label" for="logo">Enviar logo (PNG, JPEG ou WebP)</label>
                 <input type="file" class="form-control app-input" id="logo" name="logo" accept="image/png,image/jpeg,image/webp">
+            </div>
+            <div class="col-md-6">
+                <label class="form-label lumis-label" for="favicon">Favicon (PNG, ICO ou WebP)</label>
+                <input type="file" class="form-control app-input" id="favicon" name="favicon" accept="image/png,image/x-icon,image/vnd.microsoft.icon,image/webp,image/jpeg">
             </div>
             <div class="col-md-3">
                 <label class="form-label lumis-label" for="primary_color">Cor primária</label>

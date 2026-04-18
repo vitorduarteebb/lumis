@@ -18,17 +18,32 @@ $rows = is_array($certificates ?? null) ? $certificates : [];
         <div class="lumis-form-section__title">Novo registro</div>
         <form method="post" action="/configuracoes/certificado-digital" enctype="multipart/form-data" class="row g-2 align-items-end">
             <?= \App\Helpers\Csrf::field() ?>
-            <div class="col-md-4">
+            <div class="col-md-3">
                 <label class="form-label lumis-label small mb-1" for="label">Rótulo</label>
                 <input type="text" class="form-control app-input" id="label" name="label" required placeholder="Ex.: Matriz 2026">
+            </div>
+            <div class="col-md-2">
+                <label class="form-label lumis-label small mb-1" for="cert_type">Tipo</label>
+                <select class="form-select app-input" id="cert_type" name="cert_type">
+                    <option value="A1">A1 (arquivo)</option>
+                    <option value="A3">A3 (referência)</option>
+                </select>
             </div>
             <div class="col-md-2">
                 <label class="form-label lumis-label small mb-1" for="expires_at">Validade</label>
                 <input type="date" class="form-control app-input" id="expires_at" name="expires_at">
             </div>
-            <div class="col-md-4">
+            <div class="col-md-3">
                 <label class="form-label lumis-label small mb-1" for="cert_file">Arquivo (.pfx / .p12)</label>
                 <input type="file" class="form-control app-input" id="cert_file" name="cert_file">
+            </div>
+            <div class="col-md-2">
+                <label class="form-label lumis-label small mb-1" for="cert_password">Senha do certificado</label>
+                <input type="password" class="form-control app-input" id="cert_password" name="cert_password" autocomplete="new-password" placeholder="Opcional">
+            </div>
+            <div class="col-md-12">
+                <label class="form-label lumis-label small mb-1" for="notes">Observações</label>
+                <input type="text" class="form-control app-input" id="notes" name="notes" placeholder="Uso, CNPJ vinculado…">
             </div>
             <div class="col-md-2">
                 <button type="submit" class="btn btn-primary btn-sm rounded-3 w-100">Salvar</button>
@@ -42,22 +57,26 @@ $rows = is_array($certificates ?? null) ? $certificates : [];
         <thead>
             <tr>
                 <th>Rótulo</th>
+                <th>Tipo</th>
                 <th>Validade</th>
                 <th>Status</th>
                 <th>Arquivo</th>
+                <th>Senha</th>
                 <?php if (can('configuracoes.certificado_digital.edit')): ?><th class="text-end">Ações</th><?php endif; ?>
             </tr>
         </thead>
         <tbody>
             <?php if ($rows === []): ?>
-                <tr><td colspan="5" class="text-secondary small py-4">Nenhum certificado registrado.</td></tr>
+                <tr><td colspan="7" class="text-secondary small py-4">Nenhum certificado registrado.</td></tr>
             <?php endif; ?>
             <?php foreach ($rows as $r): ?>
                 <tr>
                     <td class="text-white"><?= htmlspecialchars((string) ($r['label'] ?? ''), ENT_QUOTES, 'UTF-8') ?></td>
+                    <td class="text-secondary small"><?= htmlspecialchars((string) ($r['cert_type'] ?? 'A1'), ENT_QUOTES, 'UTF-8') ?></td>
                     <td class="text-secondary small"><?= htmlspecialchars((string) ($r['expires_at'] ?? '—'), ENT_QUOTES, 'UTF-8') ?></td>
                     <td><span class="badge text-bg-secondary"><?= htmlspecialchars((string) ($r['status'] ?? ''), ENT_QUOTES, 'UTF-8') ?></span></td>
                     <td class="text-secondary small"><?= ($r['file_path'] ?? null) ? 'Sim' : 'Não' ?></td>
+                    <td class="text-secondary small"><?= !empty($r['password_encrypted']) ? 'Armazenada' : '—' ?></td>
                     <?php if (can('configuracoes.certificado_digital.edit')): ?>
                         <td class="text-end">
                             <form method="post" action="/configuracoes/certificado-digital/excluir" class="d-inline" onsubmit="return confirm('Remover este registro?');">

@@ -48,16 +48,22 @@ final class ConfiguracoesController extends Controller
             redirect('/configuracoes/gerais');
         }
         $appTitle = trim((string) $request->input('app_title', ''));
+        $displayName = trim((string) $request->input('display_name', ''));
         $timezone = trim((string) $request->input('timezone', 'America/Sao_Paulo'));
         $locale = trim((string) $request->input('locale', 'pt_BR'));
+        $currency = trim((string) $request->input('default_currency', 'BRL'));
+        $pageSize = max(5, min(100, (int) $request->input('default_page_size', 15)));
         $companyName = trim((string) $request->input('company_name', ''));
 
         $profileRepo = new CompanyProfileRepository();
         $profileRepo->ensureRow($cid);
         $profileRepo->updateProfile($cid, [
             'app_title' => $appTitle === '' ? null : $appTitle,
+            'display_name' => $displayName === '' ? null : $displayName,
             'timezone' => $timezone === '' ? 'America/Sao_Paulo' : $timezone,
             'locale' => $locale === '' ? 'pt_BR' : $locale,
+            'default_currency' => $currency === '' ? 'BRL' : strtoupper(substr($currency, 0, 10)),
+            'default_page_size' => $pageSize,
         ]);
 
         if ($companyName !== '') {
@@ -141,6 +147,8 @@ final class ConfiguracoesController extends Controller
         $profileRepo = new CompanyProfileRepository();
         $profileRepo->ensureRow($cid);
         $profileRepo->updateProfile($cid, [
+            'trade_name' => trim((string) $request->input('trade_name', '')) === '' ? null : trim((string) $request->input('trade_name', '')),
+            'website' => trim((string) $request->input('website', '')) === '' ? null : trim((string) $request->input('website', '')),
             'legal_name' => trim((string) $request->input('legal_name', '')) === '' ? null : trim((string) $request->input('legal_name', '')),
             'document_cnpj' => trim((string) $request->input('document_cnpj', '')) === '' ? null : trim((string) $request->input('document_cnpj', '')),
             'state_registration' => trim((string) $request->input('state_registration', '')) === '' ? null : trim((string) $request->input('state_registration', '')),
@@ -214,12 +222,39 @@ final class ConfiguracoesController extends Controller
 
         $profileRepo = new CompanyProfileRepository();
         $profileRepo->ensureRow($cid);
+        $displayName = trim((string) $request->input('display_name', ''));
+        $faviconPath = null;
+        if (isset($_FILES['favicon']) && is_array($_FILES['favicon']) && (int) ($_FILES['favicon']['error'] ?? 0) === UPLOAD_ERR_OK) {
+            $tmp = (string) ($_FILES['favicon']['tmp_name'] ?? '');
+            $mime = $tmp !== '' && is_file($tmp) ? (string) (mime_content_type($tmp) ?: '') : '';
+            if (!in_array($mime, ['image/png', 'image/jpeg', 'image/webp', 'image/x-icon', 'image/vnd.microsoft.icon'], true)) {
+                Session::flash('error', 'Favicon deve ser PNG, JPEG, WebP ou ICO.');
+                redirect('/configuracoes/marca-empresa');
+            }
+            $ext = str_contains($mime, 'icon') ? 'ico' : ($mime === 'image/png' ? 'png' : ($mime === 'image/webp' ? 'webp' : 'jpg'));
+            $dir = base_path('public/uploads/favicons/' . $cid);
+            if (!is_dir($dir) && !@mkdir($dir, 0775, true) && !is_dir($dir)) {
+                Session::flash('error', 'Não foi possível criar pasta de uploads.');
+                redirect('/configuracoes/marca-empresa');
+            }
+            $dest = $dir . '/favicon.' . $ext;
+            if (!move_uploaded_file($tmp, $dest)) {
+                Session::flash('error', 'Falha ao salvar o favicon.');
+                redirect('/configuracoes/marca-empresa');
+            }
+            $faviconPath = '/uploads/favicons/' . $cid . '/favicon.' . $ext;
+        }
+
         $data = [
+            'display_name' => $displayName === '' ? null : $displayName,
             'primary_color' => $primary === '' ? null : $primary,
             'accent_color' => $accent === '' ? null : $accent,
         ];
         if ($logoPath !== null) {
             $data['logo_path'] = $logoPath;
+        }
+        if ($faviconPath !== null) {
+            $data['favicon_path'] = $faviconPath;
         }
         $profileRepo->updateProfile($cid, $data);
 
@@ -364,7 +399,20 @@ final class ConfiguracoesController extends Controller
             }
         }
         $repo = new DigitalCertificateRepository();
-        $repo->insert($cid, $label, $expiresAt, $filePath, $filePath !== null ? 'stored' : 'pending');
+        $certType = trim((string) $request->input('cert_type', 'A1'));
+        $notes = trim((string) $request->input('notes', ''));
+        $pwPlain = (string) $request->input('cert_password', '');
+        $pwEnc = $pwPlain !== '' ? lumis_encrypt_secret($pwPlain) : null;
+        $repo->insert(
+            $cid,
+            $label,
+            $expiresAt,
+            $filePath,
+            $filePath !== null ? 'stored' : 'pending',
+            $certType !== '' ? $certType : 'A1',
+            $notes === '' ? null : $notes,
+            $pwEnc
+        );
         Session::flash('success', 'Registro de certificado criado.');
         redirect('/configuracoes/certificado-digital');
     }
@@ -560,6 +608,8 @@ final class ConfiguracoesController extends Controller
         $cid = $this->requireCompany();
         $repo = new EmailNotificationRepository();
         $map = $repo->mapForCompany($cid);
+        $tplMap = $repo->templateMapForCompany($cid);
+        $templates = (new EmailTemplateRepository())->listByCompany($cid);
 
         return $this->view('configuracoes/avisos_email', [
             'title' => 'Avisos por e-mail',
@@ -571,6 +621,8 @@ final class ConfiguracoesController extends Controller
             ],
             'eventLabels' => EmailNotificationRepository::EVENT_LABELS,
             'enabledMap' => $map,
+            'templateMap' => $tplMap,
+            'emailTemplates' => $templates,
         ]);
     }
 
@@ -584,7 +636,9 @@ final class ConfiguracoesController extends Controller
         $repo = new EmailNotificationRepository();
         foreach (array_keys(EmailNotificationRepository::EVENT_LABELS) as $key) {
             $en = (int) $request->input('event_' . $key, 0) === 1 ? 1 : 0;
-            $repo->upsert($cid, $key, $en);
+            $tplRaw = (int) $request->input('template_' . $key, 0);
+            $tplId = $tplRaw > 0 ? $tplRaw : null;
+            $repo->upsert($cid, $key, $en, $tplId);
         }
         Session::flash('success', 'Preferências de notificação salvas.');
         redirect('/configuracoes/avisos-email');

@@ -40,9 +40,10 @@ final class CompanyProfileRepository extends BaseRepository
     {
         $this->ensureRow($companyId);
         $fields = [
-            'app_title', 'legal_name', 'document_cnpj', 'state_registration', 'municipal_registration',
-            'email', 'phone', 'mobile', 'cep', 'street', 'address_number', 'complement', 'district',
-            'city', 'state', 'timezone', 'locale', 'logo_path', 'primary_color', 'accent_color', 'notes',
+            'display_name', 'app_title', 'legal_name', 'trade_name', 'document_cnpj', 'state_registration', 'municipal_registration',
+            'email', 'phone', 'mobile', 'website', 'cep', 'street', 'address_number', 'complement', 'district',
+            'city', 'state', 'timezone', 'locale', 'default_currency', 'default_page_size',
+            'logo_path', 'favicon_path', 'primary_color', 'accent_color', 'notes',
         ];
         $set = [];
         $params = ['cid' => $companyId];
