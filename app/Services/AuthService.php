@@ -25,24 +25,25 @@ final class AuthService
     public function login(string $email, string $password, Request $request): ?string
     {
         $email = trim($email);
+        $email = function_exists('mb_strtolower') ? mb_strtolower($email, 'UTF-8') : strtolower($email);
         $ip = (string) ($request->server('REMOTE_ADDR') ?? '');
         $ua = (string) ($request->server('HTTP_USER_AGENT') ?? '');
 
         $user = $this->users->findByEmail($email);
         if ($user === null) {
-            $this->audit->log(null, 'auth.login_failed', 'auth', 'E-mail não encontrado.', $ip, $ua);
+            $this->auditSafe(null, 'auth.login_failed', 'auth', 'E-mail não encontrado.', $ip, $ua);
             return 'Credenciais inválidas.';
         }
 
         $userId = (int) $user['id'];
         $status = (int) ($user['status'] ?? 0);
         if ($status !== 1) {
-            $this->audit->log($userId, 'auth.login_blocked', 'auth', 'Tentativa de login em conta inativa.', $ip, $ua);
+            $this->auditSafe($userId, 'auth.login_blocked', 'auth', 'Tentativa de login em conta inativa.', $ip, $ua);
             return 'Conta inativa. Contate o administrador.';
         }
 
         if (!password_verify($password, (string) $user['password'])) {
-            $this->audit->log($userId, 'auth.login_failed', 'auth', 'Senha incorreta.', $ip, $ua);
+            $this->auditSafe($userId, 'auth.login_failed', 'auth', 'Senha incorreta.', $ip, $ua);
             return 'Credenciais inválidas.';
         }
 
@@ -60,9 +61,27 @@ final class AuthService
         Session::put('role_slugs', $roleSlugs);
 
         $this->users->updateLastLogin($userId);
-        $this->audit->log($userId, 'auth.login_success', 'auth', 'Login realizado com sucesso.', $ip, $ua);
+        $this->auditSafe($userId, 'auth.login_success', 'auth', 'Login realizado com sucesso.', $ip, $ua);
 
         return null;
+    }
+
+    /**
+     * Auditoria não deve impedir login se a tabela estiver indisponível.
+     */
+    private function auditSafe(
+        ?int $userId,
+        string $action,
+        string $module,
+        ?string $description,
+        string $ip,
+        string $ua
+    ): void {
+        try {
+            $this->audit->log($userId, $action, $module, $description, $ip, $ua);
+        } catch (\Throwable $e) {
+            error_log('[Lumis] audit log falhou: ' . $e->getMessage());
+        }
     }
 
     public function logout(Request $request): void

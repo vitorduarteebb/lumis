@@ -51,6 +51,11 @@ final class AuthController extends Controller
             Response::redirect('/login');
         }
 
+        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            Session::flash('error', 'Informe um e-mail válido.');
+            Response::redirect('/login');
+        }
+
         $error = $this->authService->login($email, $password, $request);
         if ($error !== null) {
             Session::flash('error', $error);
