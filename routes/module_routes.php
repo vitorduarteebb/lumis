@@ -4,9 +4,7 @@ declare(strict_types=1);
 
 use App\Controllers\AtendimentosController;
 use App\Controllers\ConfiguracoesController;
-use App\Controllers\ContratosController;
 use App\Controllers\FinanceiroController;
-use App\Controllers\NotasFiscaisController;
 use App\Controllers\RelatoriosController;
 use App\Core\Router;
 use App\Middlewares\AuthMiddleware;
@@ -40,18 +38,7 @@ return static function (Router $router): void {
     $router->get('/financeiro/fluxo-caixa', [FinanceiroController::class, 'fluxoCaixa'], $m('financeiro.fluxo_caixa.view', ['finance.view']));
     $router->get('/financeiro/boletos-bancarios', [FinanceiroController::class, 'boletosBancarios'], $m('financeiro.boletos_bancarios.view', ['finance.view']));
 
-    /* Notas fiscais */
-    $router->get('/notas-fiscais/produtos', [NotasFiscaisController::class, 'produtos'], $m('notas_fiscais.produtos.view'));
-    $router->get('/notas-fiscais/servicos', [NotasFiscaisController::class, 'servicos'], $m('notas_fiscais.servicos.view'));
-    $router->get('/notas-fiscais/consumidor', [NotasFiscaisController::class, 'consumidor'], $m('notas_fiscais.consumidor.view'));
-    $router->get('/notas-fiscais/compras', [NotasFiscaisController::class, 'compras'], $m('notas_fiscais.compras.view'));
-    $router->get('/notas-fiscais/opcoes-auxiliares', [NotasFiscaisController::class, 'opcoesAuxiliares'], $m('notas_fiscais.opcoes_auxiliares.view'));
-
-    /* Contratos */
-    $router->get('/contratos/servicos', [ContratosController::class, 'servicos'], $m('contratos.servicos.view'));
-    $router->get('/contratos/locacoes', [ContratosController::class, 'locacoes'], $m('contratos.locacoes.view'));
-    $router->get('/contratos/assinaturas', [ContratosController::class, 'assinaturas'], $m('contratos.assinaturas.view'));
-    $router->get('/contratos/opcoes-auxiliares', [ContratosController::class, 'opcoesAuxiliares'], $m('contratos.opcoes_auxiliares.view'));
+    /* Notas fiscais e contratos — CRUD em crud_routes.php */
 
     /* Atendimentos */
     $router->get('/atendimentos/painel', [AtendimentosController::class, 'painel'], $m('atendimentos.painel.view'));

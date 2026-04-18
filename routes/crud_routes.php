@@ -3,11 +3,15 @@
 declare(strict_types=1);
 
 use App\Controllers\CadastrosLookupController;
+use App\Controllers\ContratosController;
+use App\Controllers\ContratosLookupController;
 use App\Controllers\EstoqueController;
 use App\Controllers\EstoqueLookupController;
 use App\Controllers\CarriersController;
 use App\Controllers\ClientsController;
 use App\Controllers\ConfiguracoesController;
+use App\Controllers\NotasFiscaisController;
+use App\Controllers\NotasFiscaisLookupController;
 use App\Controllers\EmployeesController;
 use App\Controllers\FinanceiroController;
 use App\Controllers\FinanceiroLookupController;
@@ -265,4 +269,98 @@ return static function (Router $router): void {
     $router->post('/estoque/opcoes-auxiliares/{id}/excluir', [EstoqueLookupController::class, 'destroy'], $m('estoque.opcoes_auxiliares.delete', ['estoque.opcoes_auxiliares.view']));
     $router->post('/estoque/opcoes-auxiliares/{id}', [EstoqueLookupController::class, 'update'], $m('estoque.opcoes_auxiliares.edit', ['estoque.opcoes_auxiliares.view']));
     $router->get('/estoque/opcoes-auxiliares', [EstoqueLookupController::class, 'index'], $m('estoque.opcoes_auxiliares.view'));
+
+    /* ========== Notas fiscais — produtos ========== */
+    $router->get('/notas-fiscais/produtos/novo', [NotasFiscaisController::class, 'produtosNovo'], $m('notas_fiscais.produtos.create', ['notas_fiscais.produtos.view']));
+    $router->post('/notas-fiscais/produtos', [NotasFiscaisController::class, 'produtosStore'], $m('notas_fiscais.produtos.create', ['notas_fiscais.produtos.view']));
+    $router->get('/notas-fiscais/produtos/{id}/download/{tipo}', [NotasFiscaisController::class, 'produtosDownload'], $m('notas_fiscais.produtos.view'));
+    $router->post('/notas-fiscais/produtos/{id}/cancelar', [NotasFiscaisController::class, 'produtosCancelar'], $m('notas_fiscais.produtos.edit', ['notas_fiscais.produtos.view']));
+    $router->post('/notas-fiscais/produtos/{id}/status', [NotasFiscaisController::class, 'produtosStatus'], $m('notas_fiscais.produtos.edit', ['notas_fiscais.produtos.view']));
+    $router->get('/notas-fiscais/produtos/{id}/editar', [NotasFiscaisController::class, 'produtosEditar'], $m('notas_fiscais.produtos.edit', ['notas_fiscais.produtos.view']));
+    $router->post('/notas-fiscais/produtos/{id}', [NotasFiscaisController::class, 'produtosUpdate'], $m('notas_fiscais.produtos.edit', ['notas_fiscais.produtos.view']));
+    $router->get('/notas-fiscais/produtos/{id}', [NotasFiscaisController::class, 'produtosShow'], $m('notas_fiscais.produtos.view'));
+    $router->get('/notas-fiscais/produtos', [NotasFiscaisController::class, 'produtos'], $m('notas_fiscais.produtos.view'));
+
+    /* ========== Notas fiscais — serviços ========== */
+    $router->get('/notas-fiscais/servicos/novo', [NotasFiscaisController::class, 'servicosNovo'], $m('notas_fiscais.servicos.create', ['notas_fiscais.servicos.view']));
+    $router->post('/notas-fiscais/servicos', [NotasFiscaisController::class, 'servicosStore'], $m('notas_fiscais.servicos.create', ['notas_fiscais.servicos.view']));
+    $router->get('/notas-fiscais/servicos/{id}/download/{tipo}', [NotasFiscaisController::class, 'servicosDownload'], $m('notas_fiscais.servicos.view'));
+    $router->post('/notas-fiscais/servicos/{id}/cancelar', [NotasFiscaisController::class, 'servicosCancelar'], $m('notas_fiscais.servicos.edit', ['notas_fiscais.servicos.view']));
+    $router->post('/notas-fiscais/servicos/{id}/status', [NotasFiscaisController::class, 'servicosStatus'], $m('notas_fiscais.servicos.edit', ['notas_fiscais.servicos.view']));
+    $router->get('/notas-fiscais/servicos/{id}/editar', [NotasFiscaisController::class, 'servicosEditar'], $m('notas_fiscais.servicos.edit', ['notas_fiscais.servicos.view']));
+    $router->post('/notas-fiscais/servicos/{id}', [NotasFiscaisController::class, 'servicosUpdate'], $m('notas_fiscais.servicos.edit', ['notas_fiscais.servicos.view']));
+    $router->get('/notas-fiscais/servicos/{id}', [NotasFiscaisController::class, 'servicosShow'], $m('notas_fiscais.servicos.view'));
+    $router->get('/notas-fiscais/servicos', [NotasFiscaisController::class, 'servicos'], $m('notas_fiscais.servicos.view'));
+
+    /* ========== Notas fiscais — consumidor ========== */
+    $router->get('/notas-fiscais/consumidor/novo', [NotasFiscaisController::class, 'consumidorNovo'], $m('notas_fiscais.consumidor.create', ['notas_fiscais.consumidor.view']));
+    $router->post('/notas-fiscais/consumidor', [NotasFiscaisController::class, 'consumidorStore'], $m('notas_fiscais.consumidor.create', ['notas_fiscais.consumidor.view']));
+    $router->get('/notas-fiscais/consumidor/{id}/download/{tipo}', [NotasFiscaisController::class, 'consumidorDownload'], $m('notas_fiscais.consumidor.view'));
+    $router->post('/notas-fiscais/consumidor/{id}/cancelar', [NotasFiscaisController::class, 'consumidorCancelar'], $m('notas_fiscais.consumidor.edit', ['notas_fiscais.consumidor.view']));
+    $router->post('/notas-fiscais/consumidor/{id}/status', [NotasFiscaisController::class, 'consumidorStatus'], $m('notas_fiscais.consumidor.edit', ['notas_fiscais.consumidor.view']));
+    $router->get('/notas-fiscais/consumidor/{id}/editar', [NotasFiscaisController::class, 'consumidorEditar'], $m('notas_fiscais.consumidor.edit', ['notas_fiscais.consumidor.view']));
+    $router->post('/notas-fiscais/consumidor/{id}', [NotasFiscaisController::class, 'consumidorUpdate'], $m('notas_fiscais.consumidor.edit', ['notas_fiscais.consumidor.view']));
+    $router->get('/notas-fiscais/consumidor/{id}', [NotasFiscaisController::class, 'consumidorShow'], $m('notas_fiscais.consumidor.view'));
+    $router->get('/notas-fiscais/consumidor', [NotasFiscaisController::class, 'consumidor'], $m('notas_fiscais.consumidor.view'));
+
+    /* ========== Notas fiscais — compras ========== */
+    $router->get('/notas-fiscais/compras/novo', [NotasFiscaisController::class, 'comprasNovo'], $m('notas_fiscais.compras.create', ['notas_fiscais.compras.view']));
+    $router->post('/notas-fiscais/compras', [NotasFiscaisController::class, 'comprasStore'], $m('notas_fiscais.compras.create', ['notas_fiscais.compras.view']));
+    $router->get('/notas-fiscais/compras/{id}/download/{tipo}', [NotasFiscaisController::class, 'comprasDownload'], $m('notas_fiscais.compras.view'));
+    $router->post('/notas-fiscais/compras/{id}/cancelar', [NotasFiscaisController::class, 'comprasCancelar'], $m('notas_fiscais.compras.edit', ['notas_fiscais.compras.view']));
+    $router->post('/notas-fiscais/compras/{id}/status', [NotasFiscaisController::class, 'comprasStatus'], $m('notas_fiscais.compras.edit', ['notas_fiscais.compras.view']));
+    $router->get('/notas-fiscais/compras/{id}/editar', [NotasFiscaisController::class, 'comprasEditar'], $m('notas_fiscais.compras.edit', ['notas_fiscais.compras.view']));
+    $router->post('/notas-fiscais/compras/{id}', [NotasFiscaisController::class, 'comprasUpdate'], $m('notas_fiscais.compras.edit', ['notas_fiscais.compras.view']));
+    $router->get('/notas-fiscais/compras/{id}', [NotasFiscaisController::class, 'comprasShow'], $m('notas_fiscais.compras.view'));
+    $router->get('/notas-fiscais/compras', [NotasFiscaisController::class, 'compras'], $m('notas_fiscais.compras.view'));
+
+    /* ========== Notas fiscais — opções auxiliares (lookup) ========== */
+    $router->get('/notas-fiscais/opcoes-auxiliares/novo', [NotasFiscaisLookupController::class, 'create'], $m('notas_fiscais.opcoes_auxiliares.create', ['notas_fiscais.opcoes_auxiliares.view']));
+    $router->post('/notas-fiscais/opcoes-auxiliares', [NotasFiscaisLookupController::class, 'store'], $m('notas_fiscais.opcoes_auxiliares.create', ['notas_fiscais.opcoes_auxiliares.view']));
+    $router->get('/notas-fiscais/opcoes-auxiliares/{id}/editar', [NotasFiscaisLookupController::class, 'edit'], $m('notas_fiscais.opcoes_auxiliares.edit', ['notas_fiscais.opcoes_auxiliares.view']));
+    $router->post('/notas-fiscais/opcoes-auxiliares/{id}/excluir', [NotasFiscaisLookupController::class, 'destroy'], $m('notas_fiscais.opcoes_auxiliares.delete', ['notas_fiscais.opcoes_auxiliares.view']));
+    $router->post('/notas-fiscais/opcoes-auxiliares/{id}', [NotasFiscaisLookupController::class, 'update'], $m('notas_fiscais.opcoes_auxiliares.edit', ['notas_fiscais.opcoes_auxiliares.view']));
+    $router->get('/notas-fiscais/opcoes-auxiliares', [NotasFiscaisLookupController::class, 'index'], $m('notas_fiscais.opcoes_auxiliares.view'));
+
+    /* ========== Contratos — serviços ========== */
+    $router->get('/contratos/servicos/novo', [ContratosController::class, 'servicosNovo'], $m('contratos.servicos.create', ['contratos.servicos.view']));
+    $router->post('/contratos/servicos', [ContratosController::class, 'servicosStore'], $m('contratos.servicos.create', ['contratos.servicos.view']));
+    $router->post('/contratos/servicos/{id}/cancelar', [ContratosController::class, 'servicosCancelar'], $m('contratos.servicos.edit', ['contratos.servicos.view']));
+    $router->post('/contratos/servicos/{id}/suspender', [ContratosController::class, 'servicosSuspender'], $m('contratos.servicos.edit', ['contratos.servicos.view']));
+    $router->get('/contratos/servicos/{id}/anexo', [ContratosController::class, 'servicosAnexo'], $m('contratos.servicos.view'));
+    $router->get('/contratos/servicos/{id}/editar', [ContratosController::class, 'servicosEditar'], $m('contratos.servicos.edit', ['contratos.servicos.view']));
+    $router->post('/contratos/servicos/{id}', [ContratosController::class, 'servicosUpdate'], $m('contratos.servicos.edit', ['contratos.servicos.view']));
+    $router->get('/contratos/servicos/{id}', [ContratosController::class, 'servicosShow'], $m('contratos.servicos.view'));
+    $router->get('/contratos/servicos', [ContratosController::class, 'servicos'], $m('contratos.servicos.view'));
+
+    /* ========== Contratos — locações ========== */
+    $router->get('/contratos/locacoes/novo', [ContratosController::class, 'locacoesNovo'], $m('contratos.locacoes.create', ['contratos.locacoes.view']));
+    $router->post('/contratos/locacoes', [ContratosController::class, 'locacoesStore'], $m('contratos.locacoes.create', ['contratos.locacoes.view']));
+    $router->post('/contratos/locacoes/{id}/encerrar', [ContratosController::class, 'locacoesEncerrar'], $m('contratos.locacoes.edit', ['contratos.locacoes.view']));
+    $router->post('/contratos/locacoes/{id}/cancelar', [ContratosController::class, 'locacoesCancelar'], $m('contratos.locacoes.edit', ['contratos.locacoes.view']));
+    $router->get('/contratos/locacoes/{id}/anexo', [ContratosController::class, 'locacoesAnexo'], $m('contratos.locacoes.view'));
+    $router->get('/contratos/locacoes/{id}/editar', [ContratosController::class, 'locacoesEditar'], $m('contratos.locacoes.edit', ['contratos.locacoes.view']));
+    $router->post('/contratos/locacoes/{id}', [ContratosController::class, 'locacoesUpdate'], $m('contratos.locacoes.edit', ['contratos.locacoes.view']));
+    $router->get('/contratos/locacoes/{id}', [ContratosController::class, 'locacoesShow'], $m('contratos.locacoes.view'));
+    $router->get('/contratos/locacoes', [ContratosController::class, 'locacoes'], $m('contratos.locacoes.view'));
+
+    /* ========== Contratos — assinaturas ========== */
+    $router->get('/contratos/assinaturas/novo', [ContratosController::class, 'assinaturasNovo'], $m('contratos.assinaturas.create', ['contratos.assinaturas.view']));
+    $router->post('/contratos/assinaturas', [ContratosController::class, 'assinaturasStore'], $m('contratos.assinaturas.create', ['contratos.assinaturas.view']));
+    $router->post('/contratos/assinaturas/{id}/suspender', [ContratosController::class, 'assinaturasSuspender'], $m('contratos.assinaturas.edit', ['contratos.assinaturas.view']));
+    $router->post('/contratos/assinaturas/{id}/reativar', [ContratosController::class, 'assinaturasReativar'], $m('contratos.assinaturas.edit', ['contratos.assinaturas.view']));
+    $router->post('/contratos/assinaturas/{id}/cancelar', [ContratosController::class, 'assinaturasCancelar'], $m('contratos.assinaturas.edit', ['contratos.assinaturas.view']));
+    $router->get('/contratos/assinaturas/{id}/anexo', [ContratosController::class, 'assinaturasAnexo'], $m('contratos.assinaturas.view'));
+    $router->get('/contratos/assinaturas/{id}/editar', [ContratosController::class, 'assinaturasEditar'], $m('contratos.assinaturas.edit', ['contratos.assinaturas.view']));
+    $router->post('/contratos/assinaturas/{id}', [ContratosController::class, 'assinaturasUpdate'], $m('contratos.assinaturas.edit', ['contratos.assinaturas.view']));
+    $router->get('/contratos/assinaturas/{id}', [ContratosController::class, 'assinaturasShow'], $m('contratos.assinaturas.view'));
+    $router->get('/contratos/assinaturas', [ContratosController::class, 'assinaturas'], $m('contratos.assinaturas.view'));
+
+    /* ========== Contratos — opções auxiliares (lookup) ========== */
+    $router->get('/contratos/opcoes-auxiliares/novo', [ContratosLookupController::class, 'create'], $m('contratos.opcoes_auxiliares.create', ['contratos.opcoes_auxiliares.view']));
+    $router->post('/contratos/opcoes-auxiliares', [ContratosLookupController::class, 'store'], $m('contratos.opcoes_auxiliares.create', ['contratos.opcoes_auxiliares.view']));
+    $router->get('/contratos/opcoes-auxiliares/{id}/editar', [ContratosLookupController::class, 'edit'], $m('contratos.opcoes_auxiliares.edit', ['contratos.opcoes_auxiliares.view']));
+    $router->post('/contratos/opcoes-auxiliares/{id}/excluir', [ContratosLookupController::class, 'destroy'], $m('contratos.opcoes_auxiliares.delete', ['contratos.opcoes_auxiliares.view']));
+    $router->post('/contratos/opcoes-auxiliares/{id}', [ContratosLookupController::class, 'update'], $m('contratos.opcoes_auxiliares.edit', ['contratos.opcoes_auxiliares.view']));
+    $router->get('/contratos/opcoes-auxiliares', [ContratosLookupController::class, 'index'], $m('contratos.opcoes_auxiliares.view'));
 };
