@@ -60,6 +60,19 @@ final class ClientRepository extends BaseRepository
     }
 
     /**
+     * @return list<array<string, mixed>>
+     */
+    public function allForCompany(int $companyId): array
+    {
+        $stmt = $this->pdo()->prepare(
+            'SELECT id, name, trade_name FROM clients WHERE company_id = :cid AND deleted_at IS NULL ORDER BY name ASC'
+        );
+        $stmt->execute(['cid' => $companyId]);
+
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    /**
      * @param array<string, mixed> $data
      */
     public function insert(int $companyId, array $data, ?int $createdBy): int

@@ -191,19 +191,4 @@ final class DashboardStatsRepository extends BaseRepository
 
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
-
-    private function tableExists(string $table): bool
-    {
-        // SHOW TABLES falha com PDO nativo (1295). information_schema com :t pode dar 1064 em alguns MySQL/MariaDB.
-        // Nome da tabela vem só de constantes internas — validar e usar quote() (sem placeholder).
-        if (!preg_match('/^[a-zA-Z0-9_]+$/', $table)) {
-            return false;
-        }
-        $pdo = $this->pdo();
-        $sql = 'SELECT COUNT(*) FROM information_schema.tables
-                WHERE table_schema = DATABASE() AND table_name = ' . $pdo->quote($table);
-        $stmt = $pdo->query($sql);
-
-        return $stmt !== false && (int) $stmt->fetchColumn() > 0;
-    }
 }

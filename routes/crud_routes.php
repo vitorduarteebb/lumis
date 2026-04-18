@@ -3,6 +3,8 @@
 declare(strict_types=1);
 
 use App\Controllers\CadastrosLookupController;
+use App\Controllers\EstoqueController;
+use App\Controllers\EstoqueLookupController;
 use App\Controllers\CarriersController;
 use App\Controllers\ClientsController;
 use App\Controllers\ConfiguracoesController;
@@ -17,6 +19,8 @@ use App\Controllers\ProdutosController;
 use App\Controllers\ServicosController;
 use App\Controllers\SuppliersController;
 use App\Controllers\UsersController;
+use App\Controllers\VendasController;
+use App\Controllers\VendasLookupController;
 use App\Core\Router;
 use App\Middlewares\AuthMiddleware;
 use App\Middlewares\PermissionMiddleware;
@@ -187,4 +191,78 @@ return static function (Router $router): void {
     $router->get('/ordens-servico/{id}/editar', [OrdensServicoController::class, 'edit'], $m('ordens_servico.edit'));
     $router->get('/ordens-servico/{id}', [OrdensServicoController::class, 'show'], $m('ordens_servico.view', ['ordens_servico.gerenciar.view']));
     $router->get('/ordens-servico', [OrdensServicoController::class, 'index'], $m('ordens_servico.view', ['ordens_servico.gerenciar.view']));
+
+    /* ========== Vendas ========== */
+    $router->post('/vendas/produtos/{id}/finalizar', [VendasController::class, 'produtosFinalizar'], $m('vendas.produtos.edit', ['vendas.produtos.view']));
+    $router->post('/vendas/produtos/{id}/cancelar', [VendasController::class, 'produtosCancelar'], $m('vendas.produtos.edit', ['vendas.produtos.view']));
+    $router->get('/vendas/produtos/novo', [VendasController::class, 'produtosNovo'], $m('vendas.produtos.create', ['vendas.produtos.view']));
+    $router->post('/vendas/produtos', [VendasController::class, 'produtosStore'], $m('vendas.produtos.create', ['vendas.produtos.view']));
+    $router->get('/vendas/produtos/{id}/pdf', [VendasController::class, 'produtosPdf'], $m('vendas.produtos.view'));
+    $router->get('/vendas/produtos/{id}/editar', [VendasController::class, 'produtosEdit'], $m('vendas.produtos.edit', ['vendas.produtos.view']));
+    $router->post('/vendas/produtos/{id}', [VendasController::class, 'produtosUpdate'], $m('vendas.produtos.edit', ['vendas.produtos.view']));
+    $router->get('/vendas/produtos/{id}', [VendasController::class, 'produtosShow'], $m('vendas.produtos.view'));
+    $router->get('/vendas/produtos', [VendasController::class, 'produtos'], $m('vendas.produtos.view'));
+
+    $router->get('/vendas/balcao', [VendasController::class, 'balcao'], $m('vendas.balcao.view'));
+    $router->post('/vendas/balcao', [VendasController::class, 'balcao'], $m('vendas.balcao.create', ['vendas.balcao.view']));
+
+    $router->post('/vendas/servicos/{id}/finalizar', [VendasController::class, 'servicosFinalizar'], $m('vendas.servicos.edit', ['vendas.servicos.view']));
+    $router->post('/vendas/servicos/{id}/cancelar', [VendasController::class, 'servicosCancelar'], $m('vendas.servicos.edit', ['vendas.servicos.view']));
+    $router->get('/vendas/servicos/novo', [VendasController::class, 'servicosNovo'], $m('vendas.servicos.create', ['vendas.servicos.view']));
+    $router->post('/vendas/servicos', [VendasController::class, 'servicosStore'], $m('vendas.servicos.create', ['vendas.servicos.view']));
+    $router->get('/vendas/servicos/{id}/pdf', [VendasController::class, 'servicosPdf'], $m('vendas.servicos.view'));
+    $router->get('/vendas/servicos/{id}/editar', [VendasController::class, 'servicosEdit'], $m('vendas.servicos.edit', ['vendas.servicos.view']));
+    $router->post('/vendas/servicos/{id}', [VendasController::class, 'servicosUpdate'], $m('vendas.servicos.edit', ['vendas.servicos.view']));
+    $router->get('/vendas/servicos/{id}', [VendasController::class, 'servicosShow'], $m('vendas.servicos.view'));
+    $router->get('/vendas/servicos', [VendasController::class, 'servicos'], $m('vendas.servicos.view'));
+
+    $router->get('/vendas/opcoes-auxiliares/novo', [VendasLookupController::class, 'create'], $m('vendas.opcoes_auxiliares.create', ['vendas.opcoes_auxiliares.view']));
+    $router->post('/vendas/opcoes-auxiliares', [VendasLookupController::class, 'store'], $m('vendas.opcoes_auxiliares.create', ['vendas.opcoes_auxiliares.view']));
+    $router->get('/vendas/opcoes-auxiliares/{id}/editar', [VendasLookupController::class, 'edit'], $m('vendas.opcoes_auxiliares.edit', ['vendas.opcoes_auxiliares.view']));
+    $router->post('/vendas/opcoes-auxiliares/{id}/excluir', [VendasLookupController::class, 'destroy'], $m('vendas.opcoes_auxiliares.delete', ['vendas.opcoes_auxiliares.view']));
+    $router->post('/vendas/opcoes-auxiliares/{id}', [VendasLookupController::class, 'update'], $m('vendas.opcoes_auxiliares.edit', ['vendas.opcoes_auxiliares.view']));
+    $router->get('/vendas/opcoes-auxiliares', [VendasLookupController::class, 'index'], $m('vendas.opcoes_auxiliares.view'));
+
+    /* ========== Estoque ========== */
+    $router->get('/estoque/movimentacoes/{id}', [EstoqueController::class, 'movimentacaoShow'], $m('estoque.movimentacoes.view'));
+    $router->get('/estoque/movimentacoes', [EstoqueController::class, 'movimentacoes'], $m('estoque.movimentacoes.view'));
+
+    $router->get('/estoque/ajustes/novo', [EstoqueController::class, 'ajustesNovo'], $m('estoque.ajustes.create', ['estoque.ajustes.view']));
+    $router->post('/estoque/ajustes', [EstoqueController::class, 'ajustesStore'], $m('estoque.ajustes.create', ['estoque.ajustes.view']));
+    $router->get('/estoque/ajustes/{id}', [EstoqueController::class, 'ajusteShow'], $m('estoque.ajustes.view'));
+    $router->get('/estoque/ajustes', [EstoqueController::class, 'ajustes'], $m('estoque.ajustes.view'));
+
+    $router->post('/estoque/transferencias/{id}/concluir', [EstoqueController::class, 'transferenciaConcluir'], $m('estoque.transferencias.edit', ['estoque.transferencias.view']));
+    $router->get('/estoque/transferencias/novo', [EstoqueController::class, 'transferenciasNovo'], $m('estoque.transferencias.create', ['estoque.transferencias.view']));
+    $router->post('/estoque/transferencias', [EstoqueController::class, 'transferenciasStore'], $m('estoque.transferencias.create', ['estoque.transferencias.view']));
+    $router->get('/estoque/transferencias/{id}', [EstoqueController::class, 'transferenciaShow'], $m('estoque.transferencias.view'));
+    $router->get('/estoque/transferencias', [EstoqueController::class, 'transferencias'], $m('estoque.transferencias.view'));
+
+    $router->get('/estoque/cotacoes/novo', [EstoqueController::class, 'cotacoesNovo'], $m('estoque.cotacoes.create', ['estoque.cotacoes.view']));
+    $router->post('/estoque/cotacoes', [EstoqueController::class, 'cotacoesStore'], $m('estoque.cotacoes.create', ['estoque.cotacoes.view']));
+    $router->post('/estoque/cotacoes/{id}/excluir', [EstoqueController::class, 'cotacaoCancelar'], $m('estoque.cotacoes.delete', ['estoque.cotacoes.view']));
+    $router->get('/estoque/cotacoes/{id}/editar', [EstoqueController::class, 'cotacaoEditar'], $m('estoque.cotacoes.edit', ['estoque.cotacoes.view']));
+    $router->post('/estoque/cotacoes/{id}', [EstoqueController::class, 'cotacaoUpdate'], $m('estoque.cotacoes.edit', ['estoque.cotacoes.view']));
+    $router->get('/estoque/cotacoes/{id}', [EstoqueController::class, 'cotacaoShow'], $m('estoque.cotacoes.view'));
+    $router->get('/estoque/cotacoes', [EstoqueController::class, 'cotacoes'], $m('estoque.cotacoes.view'));
+
+    $router->post('/estoque/compras/{id}/finalizar', [EstoqueController::class, 'compraFinalizar'], $m('estoque.compras.edit', ['estoque.compras.view']));
+    $router->get('/estoque/compras/novo', [EstoqueController::class, 'comprasNovo'], $m('estoque.compras.create', ['estoque.compras.view']));
+    $router->post('/estoque/compras', [EstoqueController::class, 'comprasStore'], $m('estoque.compras.create', ['estoque.compras.view']));
+    $router->get('/estoque/compras/{id}/editar', [EstoqueController::class, 'compraEditar'], $m('estoque.compras.edit', ['estoque.compras.view']));
+    $router->post('/estoque/compras/{id}', [EstoqueController::class, 'compraUpdate'], $m('estoque.compras.edit', ['estoque.compras.view']));
+    $router->get('/estoque/compras/{id}', [EstoqueController::class, 'compraShow'], $m('estoque.compras.view'));
+    $router->get('/estoque/compras', [EstoqueController::class, 'compras'], $m('estoque.compras.view'));
+
+    $router->get('/estoque/trocas-devolucoes/novo', [EstoqueController::class, 'trocasNovo'], $m('estoque.trocas_devolucoes.create', ['estoque.trocas_devolucoes.view']));
+    $router->post('/estoque/trocas-devolucoes', [EstoqueController::class, 'trocasStore'], $m('estoque.trocas_devolucoes.create', ['estoque.trocas_devolucoes.view']));
+    $router->get('/estoque/trocas-devolucoes/{id}', [EstoqueController::class, 'trocaShow'], $m('estoque.trocas_devolucoes.view'));
+    $router->get('/estoque/trocas-devolucoes', [EstoqueController::class, 'trocasDevolucoes'], $m('estoque.trocas_devolucoes.view'));
+
+    $router->get('/estoque/opcoes-auxiliares/novo', [EstoqueLookupController::class, 'create'], $m('estoque.opcoes_auxiliares.create', ['estoque.opcoes_auxiliares.view']));
+    $router->post('/estoque/opcoes-auxiliares', [EstoqueLookupController::class, 'store'], $m('estoque.opcoes_auxiliares.create', ['estoque.opcoes_auxiliares.view']));
+    $router->get('/estoque/opcoes-auxiliares/{id}/editar', [EstoqueLookupController::class, 'edit'], $m('estoque.opcoes_auxiliares.edit', ['estoque.opcoes_auxiliares.view']));
+    $router->post('/estoque/opcoes-auxiliares/{id}/excluir', [EstoqueLookupController::class, 'destroy'], $m('estoque.opcoes_auxiliares.delete', ['estoque.opcoes_auxiliares.view']));
+    $router->post('/estoque/opcoes-auxiliares/{id}', [EstoqueLookupController::class, 'update'], $m('estoque.opcoes_auxiliares.edit', ['estoque.opcoes_auxiliares.view']));
+    $router->get('/estoque/opcoes-auxiliares', [EstoqueLookupController::class, 'index'], $m('estoque.opcoes_auxiliares.view'));
 };

@@ -15,6 +15,9 @@ abstract class BaseRepository
     /** @var array<string, bool> */
     private static array $columnCache = [];
 
+    /** @var array<string, bool> */
+    private static array $tableExistenceCache = [];
+
     protected function pdo(): PDO
     {
         return Database::connection();
@@ -40,5 +43,26 @@ abstract class BaseRepository
         self::$columnCache[$key] = $stmt !== false && (int) $stmt->fetchColumn() > 0;
 
         return self::$columnCache[$key];
+    }
+
+    /**
+     * Verifica se a tabela existe no schema atual (cache por pedido).
+     * Usa information_schema com quote() — nunca placeholder em nomes de tabela.
+     */
+    protected function tableExists(string $table): bool
+    {
+        if (!preg_match('/^[a-zA-Z0-9_]+$/', $table)) {
+            return false;
+        }
+        if (array_key_exists($table, self::$tableExistenceCache)) {
+            return self::$tableExistenceCache[$table];
+        }
+        $pdo = $this->pdo();
+        $sql = 'SELECT COUNT(*) FROM information_schema.tables
+                WHERE table_schema = DATABASE() AND table_name = ' . $pdo->quote($table);
+        $stmt = $pdo->query($sql);
+        self::$tableExistenceCache[$table] = $stmt !== false && (int) $stmt->fetchColumn() > 0;
+
+        return self::$tableExistenceCache[$table];
     }
 }

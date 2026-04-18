@@ -5,11 +5,9 @@ declare(strict_types=1);
 use App\Controllers\AtendimentosController;
 use App\Controllers\ConfiguracoesController;
 use App\Controllers\ContratosController;
-use App\Controllers\EstoqueController;
 use App\Controllers\FinanceiroController;
 use App\Controllers\NotasFiscaisController;
 use App\Controllers\RelatoriosController;
-use App\Controllers\VendasController;
 use App\Core\Router;
 use App\Middlewares\AuthMiddleware;
 use App\Middlewares\PermissionMiddleware;
@@ -33,20 +31,7 @@ return static function (Router $router): void {
 
     /* Ordens de serviço — rotas reais em crud_routes.php */
 
-    /* Vendas */
-    $router->get('/vendas/produtos', [VendasController::class, 'produtos'], $m('vendas.produtos.view'));
-    $router->get('/vendas/balcao', [VendasController::class, 'balcao'], $m('vendas.balcao.view'));
-    $router->get('/vendas/servicos', [VendasController::class, 'servicos'], $m('vendas.servicos.view'));
-    $router->get('/vendas/opcoes-auxiliares', [VendasController::class, 'opcoesAuxiliares'], $m('vendas.opcoes_auxiliares.view'));
-
-    /* Estoque */
-    $router->get('/estoque/movimentacoes', [EstoqueController::class, 'movimentacoes'], $m('estoque.movimentacoes.view'));
-    $router->get('/estoque/ajustes', [EstoqueController::class, 'ajustes'], $m('estoque.ajustes.view'));
-    $router->get('/estoque/transferencias', [EstoqueController::class, 'transferencias'], $m('estoque.transferencias.view'));
-    $router->get('/estoque/cotacoes', [EstoqueController::class, 'cotacoes'], $m('estoque.cotacoes.view'));
-    $router->get('/estoque/compras', [EstoqueController::class, 'compras'], $m('estoque.compras.view'));
-    $router->get('/estoque/trocas-devolucoes', [EstoqueController::class, 'trocasDevolucoes'], $m('estoque.trocas_devolucoes.view'));
-    $router->get('/estoque/opcoes-auxiliares', [EstoqueController::class, 'opcoesAuxiliares'], $m('estoque.opcoes_auxiliares.view'));
+    /* Vendas e Estoque — rotas operacionais em crud_routes.php */
 
     /* Financeiro */
     $router->get('/financeiro/contas-pagar', [FinanceiroController::class, 'contasPagar'], $m('financeiro.contas_pagar.view', ['finance.accounts_payable.view', 'finance.view']));
