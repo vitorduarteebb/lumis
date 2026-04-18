@@ -62,7 +62,6 @@ return static function (Router $router): void {
     $router->get('/financeiro/dre-gerencial', [FinanceiroController::class, 'dreGerencial'], $m('financeiro.dre_gerencial.view', ['finance.view']));
     $router->get('/financeiro/fluxo-caixa', [FinanceiroController::class, 'fluxoCaixa'], $m('financeiro.fluxo_caixa.view', ['finance.view']));
     $router->get('/financeiro/boletos-bancarios', [FinanceiroController::class, 'boletosBancarios'], $m('financeiro.boletos_bancarios.view', ['finance.view']));
-    $router->get('/financeiro/opcoes-auxiliares', [FinanceiroController::class, 'opcoesAuxiliares'], $m('financeiro.opcoes_auxiliares.view', ['finance.view']));
 
     /* Notas fiscais */
     $router->get('/notas-fiscais/produtos', [NotasFiscaisController::class, 'produtos'], $m('notas_fiscais.produtos.view'));

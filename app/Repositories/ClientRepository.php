@@ -144,4 +144,17 @@ final class ClientRepository extends BaseRepository
         );
         $stmt->execute(['id' => $id, 'cid' => $companyId]);
     }
+
+    /**
+     * @return list<array<string, mixed>>
+     */
+    public function listForSelect(int $companyId): array
+    {
+        $stmt = $this->pdo()->prepare(
+            'SELECT id, name FROM clients WHERE company_id = :cid AND deleted_at IS NULL ORDER BY name ASC'
+        );
+        $stmt->execute(['cid' => $companyId]);
+
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
 }

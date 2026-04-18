@@ -7,6 +7,8 @@ use App\Controllers\CarriersController;
 use App\Controllers\ClientsController;
 use App\Controllers\ConfiguracoesController;
 use App\Controllers\EmployeesController;
+use App\Controllers\FinanceiroController;
+use App\Controllers\FinanceiroLookupController;
 use App\Controllers\ProdutosController;
 use App\Controllers\ServicosController;
 use App\Controllers\SuppliersController;
@@ -120,4 +122,16 @@ return static function (Router $router): void {
     $router->post('/servicos/{id}/excluir', [ServicosController::class, 'destroy'], $m('servicos.gerenciar.delete', ['services.delete']));
     $router->post('/servicos/{id}', [ServicosController::class, 'update'], $m('servicos.gerenciar.edit', ['services.edit']));
     $router->get('/servicos/{id}', [ServicosController::class, 'show'], $m('servicos.gerenciar.view', ['services.view']));
+
+    /* ========== Financeiro — POST e opções auxiliares (antes de module_routes) ========== */
+    $router->post('/financeiro/contas-pagar', [FinanceiroController::class, 'contasPagarPost'], $m('financeiro.contas_pagar.view', ['finance.accounts_payable.view', 'finance.view']));
+    $router->post('/financeiro/contas-receber', [FinanceiroController::class, 'contasReceberPost'], $m('financeiro.contas_receber.view', ['finance.accounts_receivable.view', 'finance.view']));
+    $router->post('/financeiro/boletos-bancarios', [FinanceiroController::class, 'boletosPost'], $m('financeiro.boletos_bancarios.view', ['finance.view']));
+
+    $router->get('/financeiro/opcoes-auxiliares/novo', [FinanceiroLookupController::class, 'create'], $m('financeiro.opcoes_auxiliares.view', ['finance.view']));
+    $router->post('/financeiro/opcoes-auxiliares', [FinanceiroLookupController::class, 'store'], $m('financeiro.opcoes_auxiliares.view', ['finance.view']));
+    $router->get('/financeiro/opcoes-auxiliares/{id}/editar', [FinanceiroLookupController::class, 'edit'], $m('financeiro.opcoes_auxiliares.view', ['finance.view']));
+    $router->post('/financeiro/opcoes-auxiliares/{id}/excluir', [FinanceiroLookupController::class, 'destroy'], $m('financeiro.opcoes_auxiliares.view', ['finance.view']));
+    $router->post('/financeiro/opcoes-auxiliares/{id}', [FinanceiroLookupController::class, 'update'], $m('financeiro.opcoes_auxiliares.view', ['finance.view']));
+    $router->get('/financeiro/opcoes-auxiliares', [FinanceiroLookupController::class, 'index'], $m('financeiro.opcoes_auxiliares.view', ['finance.view']));
 };
