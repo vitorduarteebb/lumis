@@ -9,6 +9,10 @@ use App\Controllers\ConfiguracoesController;
 use App\Controllers\EmployeesController;
 use App\Controllers\FinanceiroController;
 use App\Controllers\FinanceiroLookupController;
+use App\Controllers\OrcamentosController;
+use App\Controllers\OrcamentosLookupController;
+use App\Controllers\OrdensServicoController;
+use App\Controllers\OrdensServicoLookupController;
 use App\Controllers\ProdutosController;
 use App\Controllers\ServicosController;
 use App\Controllers\SuppliersController;
@@ -134,4 +138,53 @@ return static function (Router $router): void {
     $router->post('/financeiro/opcoes-auxiliares/{id}/excluir', [FinanceiroLookupController::class, 'destroy'], $m('financeiro.opcoes_auxiliares.view', ['finance.view']));
     $router->post('/financeiro/opcoes-auxiliares/{id}', [FinanceiroLookupController::class, 'update'], $m('financeiro.opcoes_auxiliares.view', ['finance.view']));
     $router->get('/financeiro/opcoes-auxiliares', [FinanceiroLookupController::class, 'index'], $m('financeiro.opcoes_auxiliares.view', ['finance.view']));
+
+    /* ========== Orçamentos — produtos ========== */
+    $router->get('/orcamentos/produtos/novo', [OrcamentosController::class, 'produtosNovo'], $m('orcamentos.produtos.create'));
+    $router->post('/orcamentos/produtos', [OrcamentosController::class, 'produtosStore'], $m('orcamentos.produtos.create'));
+    $router->post('/orcamentos/produtos/{id}/excluir', [OrcamentosController::class, 'produtosDestroy'], $m('orcamentos.produtos.delete'));
+    $router->post('/orcamentos/produtos/{id}/duplicar', [OrcamentosController::class, 'produtosDuplicate'], $m('orcamentos.produtos.create'));
+    $router->post('/orcamentos/produtos/{id}/converter-venda', [OrcamentosController::class, 'produtosConverterVenda'], $m('orcamentos.produtos.edit'));
+    $router->post('/orcamentos/produtos/{id}', [OrcamentosController::class, 'produtosUpdate'], $m('orcamentos.produtos.edit'));
+    $router->get('/orcamentos/produtos/{id}/pdf', [OrcamentosController::class, 'produtosPdf'], $m('orcamentos.produtos.view'));
+    $router->get('/orcamentos/produtos/{id}/editar', [OrcamentosController::class, 'produtosEdit'], $m('orcamentos.produtos.edit'));
+    $router->get('/orcamentos/produtos/{id}', [OrcamentosController::class, 'produtosShow'], $m('orcamentos.produtos.view'));
+    $router->get('/orcamentos/produtos', [OrcamentosController::class, 'produtos'], $m('orcamentos.produtos.view'));
+
+    /* ========== Orçamentos — serviços ========== */
+    $router->get('/orcamentos/servicos/novo', [OrcamentosController::class, 'servicosNovo'], $m('orcamentos.servicos.create'));
+    $router->post('/orcamentos/servicos', [OrcamentosController::class, 'servicosStore'], $m('orcamentos.servicos.create'));
+    $router->post('/orcamentos/servicos/{id}/excluir', [OrcamentosController::class, 'servicosDestroy'], $m('orcamentos.servicos.delete'));
+    $router->post('/orcamentos/servicos/{id}/duplicar', [OrcamentosController::class, 'servicosDuplicate'], $m('orcamentos.servicos.create'));
+    $router->post('/orcamentos/servicos/{id}/converter-os', [OrcamentosController::class, 'servicosConverterOs'], $m('orcamentos.servicos.edit'));
+    $router->post('/orcamentos/servicos/{id}', [OrcamentosController::class, 'servicosUpdate'], $m('orcamentos.servicos.edit'));
+    $router->get('/orcamentos/servicos/{id}/pdf', [OrcamentosController::class, 'servicosPdf'], $m('orcamentos.servicos.view'));
+    $router->get('/orcamentos/servicos/{id}/editar', [OrcamentosController::class, 'servicosEdit'], $m('orcamentos.servicos.edit'));
+    $router->get('/orcamentos/servicos/{id}', [OrcamentosController::class, 'servicosShow'], $m('orcamentos.servicos.view'));
+    $router->get('/orcamentos/servicos', [OrcamentosController::class, 'servicos'], $m('orcamentos.servicos.view'));
+
+    /* ========== Orçamentos — opções auxiliares ========== */
+    $router->get('/orcamentos/opcoes-auxiliares/novo', [OrcamentosLookupController::class, 'create'], $m('orcamentos.opcoes_auxiliares.create'));
+    $router->post('/orcamentos/opcoes-auxiliares', [OrcamentosLookupController::class, 'store'], $m('orcamentos.opcoes_auxiliares.create'));
+    $router->get('/orcamentos/opcoes-auxiliares/{id}/editar', [OrcamentosLookupController::class, 'edit'], $m('orcamentos.opcoes_auxiliares.edit'));
+    $router->post('/orcamentos/opcoes-auxiliares/{id}/excluir', [OrcamentosLookupController::class, 'destroy'], $m('orcamentos.opcoes_auxiliares.delete'));
+    $router->post('/orcamentos/opcoes-auxiliares/{id}', [OrcamentosLookupController::class, 'update'], $m('orcamentos.opcoes_auxiliares.edit'));
+    $router->get('/orcamentos/opcoes-auxiliares', [OrcamentosLookupController::class, 'index'], $m('orcamentos.opcoes_auxiliares.view'));
+
+    /* ========== Ordens de serviço (estáticos antes de /{id}) ========== */
+    $router->get('/ordens-servico/painel', [OrdensServicoController::class, 'painel'], $m('ordens_servico.painel.view'));
+    $router->get('/ordens-servico/opcoes-auxiliares/novo', [OrdensServicoLookupController::class, 'create'], $m('ordens_servico.opcoes_auxiliares.create'));
+    $router->post('/ordens-servico/opcoes-auxiliares', [OrdensServicoLookupController::class, 'store'], $m('ordens_servico.opcoes_auxiliares.create'));
+    $router->get('/ordens-servico/opcoes-auxiliares/{id}/editar', [OrdensServicoLookupController::class, 'edit'], $m('ordens_servico.opcoes_auxiliares.edit'));
+    $router->post('/ordens-servico/opcoes-auxiliares/{id}/excluir', [OrdensServicoLookupController::class, 'destroy'], $m('ordens_servico.opcoes_auxiliares.delete'));
+    $router->post('/ordens-servico/opcoes-auxiliares/{id}', [OrdensServicoLookupController::class, 'update'], $m('ordens_servico.opcoes_auxiliares.edit'));
+    $router->get('/ordens-servico/opcoes-auxiliares', [OrdensServicoLookupController::class, 'index'], $m('ordens_servico.opcoes_auxiliares.view'));
+    $router->get('/ordens-servico/novo', [OrdensServicoController::class, 'novo'], $m('ordens_servico.create'));
+    $router->post('/ordens-servico', [OrdensServicoController::class, 'store'], $m('ordens_servico.create'));
+    $router->post('/ordens-servico/{id}/excluir', [OrdensServicoController::class, 'destroy'], $m('ordens_servico.delete'));
+    $router->post('/ordens-servico/{id}', [OrdensServicoController::class, 'update'], $m('ordens_servico.edit'));
+    $router->get('/ordens-servico/{id}/pdf', [OrdensServicoController::class, 'pdf'], $m('ordens_servico.view', ['ordens_servico.gerenciar.view']));
+    $router->get('/ordens-servico/{id}/editar', [OrdensServicoController::class, 'edit'], $m('ordens_servico.edit'));
+    $router->get('/ordens-servico/{id}', [OrdensServicoController::class, 'show'], $m('ordens_servico.view', ['ordens_servico.gerenciar.view']));
+    $router->get('/ordens-servico', [OrdensServicoController::class, 'index'], $m('ordens_servico.view', ['ordens_servico.gerenciar.view']));
 };

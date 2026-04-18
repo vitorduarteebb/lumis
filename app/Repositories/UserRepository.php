@@ -226,4 +226,19 @@ final class UserRepository extends BaseRepository
         $stmt->execute(['uid' => $userId]);
         return $stmt->fetchAll(PDO::FETCH_COLUMN);
     }
+
+    /**
+     * Usuários ativos da empresa (técnicos / responsáveis em O.S.).
+     *
+     * @return list<array<string, mixed>>
+     */
+    public function listActiveForCompany(int $companyId): array
+    {
+        $stmt = $this->pdo()->prepare(
+            'SELECT id, name, email FROM users WHERE company_id = :cid AND deleted_at IS NULL AND status = 1 ORDER BY name ASC'
+        );
+        $stmt->execute(['cid' => $companyId]);
+
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
 }

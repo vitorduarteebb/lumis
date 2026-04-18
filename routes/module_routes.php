@@ -8,8 +8,6 @@ use App\Controllers\ContratosController;
 use App\Controllers\EstoqueController;
 use App\Controllers\FinanceiroController;
 use App\Controllers\NotasFiscaisController;
-use App\Controllers\OrcamentosController;
-use App\Controllers\OrdensServicoController;
 use App\Controllers\RelatoriosController;
 use App\Controllers\VendasController;
 use App\Core\Router;
@@ -31,15 +29,9 @@ return static function (Router $router): void {
 
     /* Produtos — rotas CRUD e submenus em crud_routes.php */
 
-    /* Orçamentos */
-    $router->get('/orcamentos/produtos', [OrcamentosController::class, 'produtos'], $m('orcamentos.produtos.view'));
-    $router->get('/orcamentos/servicos', [OrcamentosController::class, 'servicos'], $m('orcamentos.servicos.view'));
-    $router->get('/orcamentos/opcoes-auxiliares', [OrcamentosController::class, 'opcoesAuxiliares'], $m('orcamentos.opcoes_auxiliares.view'));
+    /* Orçamentos — rotas reais em crud_routes.php */
 
-    /* Ordens de serviço */
-    $router->get('/ordens-servico', [OrdensServicoController::class, 'index'], $m('ordens_servico.gerenciar.view'));
-    $router->get('/ordens-servico/painel', [OrdensServicoController::class, 'painel'], $m('ordens_servico.painel.view'));
-    $router->get('/ordens-servico/opcoes-auxiliares', [OrdensServicoController::class, 'opcoesAuxiliares'], $m('ordens_servico.opcoes_auxiliares.view'));
+    /* Ordens de serviço — rotas reais em crud_routes.php */
 
     /* Vendas */
     $router->get('/vendas/produtos', [VendasController::class, 'produtos'], $m('vendas.produtos.view'));

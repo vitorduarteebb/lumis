@@ -110,4 +110,17 @@ final class ServiceRepository extends BaseRepository
         );
         $stmt->execute(['id' => $id, 'cid' => $companyId]);
     }
+
+    /**
+     * @return list<array<string, mixed>>
+     */
+    public function listForSelect(int $companyId): array
+    {
+        $stmt = $this->pdo()->prepare(
+            'SELECT id, name, price FROM services WHERE company_id = :cid AND deleted_at IS NULL AND status = 1 ORDER BY name ASC LIMIT 500'
+        );
+        $stmt->execute(['cid' => $companyId]);
+
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
 }

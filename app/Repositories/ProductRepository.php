@@ -214,4 +214,83 @@ final class ProductRepository extends BaseRepository
 
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
+
+    /**
+     * Lista enxuta para selects em orçamentos / vendas.
+     *
+     * @return list<array<string, mixed>>
+     */
+    public function listForSelect(int $companyId): array
+    {
+        $stmt = $this->pdo()->prepare(
+            'SELECT id, name, sku, sale_price FROM products WHERE company_id = :cid AND deleted_at IS NULL AND status = 1 ORDER BY name ASC LIMIT 500'
+        );
+        $stmt->execute(['cid' => $companyId]);
+
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    /**
+     * Baixa estoque na venda a partir de orçamento. Retorna false se saldo insuficiente.
+     * Abre transação própria (uso pontual).
+     */
+    public function tryDecrementStockForSale(int $companyId, int $productId, float $qty, string $reference, ?int $userId): bool
+    {
+        if ($qty <= 0) {
+            return true;
+        }
+        $pdo = $this->pdo();
+        $pdo->beginTransaction();
+        try {
+            $ok = $this->applyStockOutNoTx($companyId, $productId, $qty, $reference, $userId);
+            if (!$ok) {
+                $pdo->rollBack();
+
+                return false;
+            }
+            $pdo->commit();
+
+            return true;
+        } catch (\Throwable $e) {
+            $pdo->rollBack();
+            throw $e;
+        }
+    }
+
+    /**
+     * Baixa estoque dentro de uma transação já aberta (ex.: venda + orçamento no mesmo commit).
+     */
+    public function applyStockOutNoTx(int $companyId, int $productId, float $qty, string $reference, ?int $userId): bool
+    {
+        if ($qty <= 0) {
+            return true;
+        }
+        $pdo = $this->pdo();
+        $stmt = $pdo->prepare(
+            'SELECT stock_qty FROM products WHERE id = :pid AND company_id = :cid AND deleted_at IS NULL FOR UPDATE'
+        );
+        $stmt->execute(['pid' => $productId, 'cid' => $companyId]);
+        $cur = (float) $stmt->fetchColumn();
+        if ($cur + 1e-9 < $qty) {
+            return false;
+        }
+        $new = $cur - $qty;
+        $pdo->prepare(
+            'UPDATE products SET stock_qty = :nq, updated_at = NOW() WHERE id = :pid AND company_id = :cid'
+        )->execute(['nq' => $new, 'pid' => $productId, 'cid' => $companyId]);
+        $pdo->prepare(
+            'INSERT INTO stock_movements (company_id, product_id, movement_type, qty, reference, notes, created_by, created_at)
+             VALUES (:cid, :pid, :mt, :qty, :ref, :notes, :uid, NOW())'
+        )->execute([
+            'cid' => $companyId,
+            'pid' => $productId,
+            'mt' => 'out',
+            'qty' => $qty,
+            'ref' => $reference,
+            'notes' => 'Saída por venda (orçamento convertido)',
+            'uid' => $userId,
+        ]);
+
+        return true;
+    }
 }
