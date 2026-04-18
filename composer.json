@@ -10,7 +10,9 @@
         "phpmailer/phpmailer": "^6.9",
         "dompdf/dompdf": "^2.0",
         "respect/validation": "^2.3",
-        "nesbot/carbon": "^3.0"
+        "nesbot/carbon": "^3.0",
+        "nfephp-org/sped-common": "^5.1",
+        "nfephp-org/sped-nfe": "^5.1"
     },
     "require-dev": {},
     "autoload": {
